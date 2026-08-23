@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 from gorev1 import calistir_gorev1
+from gorev2 import calistir_gorev2
 from main import _bul_evrak_dosyasi, _okuma_metni
 
 
@@ -26,7 +27,7 @@ def _metinleri_ayir(metin: str) -> list[str]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Gorev 1 dataset test calistiricisi")
+    parser = argparse.ArgumentParser(description="Gorev 1 ve Gorev 2 dataset calistiricisi")
     parser.add_argument("--dosya", type=Path, help="Analiz edilecek dataset dosyasi")
     args = parser.parse_args()
 
@@ -37,14 +38,16 @@ def main() -> None:
 
     sonuclar = []
     for sira, evrak in enumerate(metinler, start=1):
-        sonuc = calistir_gorev1(evrak)
+        gorev1_sonucu = calistir_gorev1(evrak)
+        gorev2_sonucu = calistir_gorev2(gorev1_sonucu)
         sonuclar.append({
             "evrak_sirasi": sira,
-            "gorev1_ciktisi": sonuc.model_dump(),
+            "gorev1_ciktisi": gorev1_sonucu.model_dump(),
+            "gorev2_ciktisi": gorev2_sonucu.model_dump(),
         })
-        print(f"Tamamlandi: {sira}/{len(metinler)}")
+        print(f"Tamamlandi: {sira}/{len(metinler)} (Gorev 1 + Gorev 2)")
 
-    cikti = dosya.with_name(f"{dosya.stem}_gorev1_sonuclari.json")
+    cikti = dosya.with_name(f"{dosya.stem}_gorev1_gorev2_sonuclari.json")
     cikti.write_text(json.dumps(sonuclar, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"{len(sonuclar)} evrak ayrica analiz edildi: {cikti}")
 

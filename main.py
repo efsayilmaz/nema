@@ -55,29 +55,15 @@ def _okuma_metni(dosya: Path) -> str:
 
 
 def _argumanlari_oku() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Tek bir evraki Gorev 1 ile analiz eder.")
+    parser = argparse.ArgumentParser(
+        description="Kullanıcı metnini Görev 1 ve Görev 2 ile analiz eder."
+    )
     parser.add_argument(
         "--file",
         type=Path,
-        help="Analiz edilecek evrak dosyasi. Verilmezse eski masaustu demo dosyasi kullanilir.",
+        help="Analiz edilecek evrak dosyası. Verilmezse terminalden metin istenir.",
     )
     return parser.parse_args()
-
-
-ORNEK_DILEKCE = """
-Atatürk Üniversitesi Fen Fakültesi Dekanlığına,
-
-Fakülteniz Fizik Bölümü 2. sınıf 220101001 numaralı öğrencisiyim. 12 Kasım 2025 tarihinde yapılan "Klasik Mekanik" dersi vize (ara sınav) sonucumun 42 olarak açıklandığını gördüm. Sınav kâğıdımın maddi hata yönünden tekrar incelenmesini ve hak ettiğim notun verilmesini talep ediyorum.
-
-Gereğini bilgilerinize saygılarımla arz ederim.
-
-Ad Soyad: Emre Karadağ
-T.C. Kimlik No: 27584916302
-Tarih: 14.11.2025
-E-posta: emre.karadag@email.com
-Telefon: 0555 123 4567
-Adres: Fen Fakültesi Öğrenci Yurdu B Blok, Erzurum
-"""
 
 
 def calistir_pipeline(evrak_metni: str) -> None:
@@ -112,13 +98,10 @@ def main() -> None:
         else:
             print("İşlenen veri: Standart girdi (stdin)")
     else:
-        try:
-            evrak_dosyasi = _bul_evrak_dosyasi()
-            evrak_metni = _okuma_metni(evrak_dosyasi)
-            print(f"İşlenen dosya: {evrak_dosyasi}")
-        except FileNotFoundError:
-            print("Masaüstünde evrak dosyası bulunamadı. Örnek senaryo (dilekçe metni) çalıştırılıyor...\n")
-            evrak_metni = ORNEK_DILEKCE
+        evrak_metni = input("Evrak metnini girin: ").strip()
+        if not evrak_metni:
+            raise ValueError("Evrak metni boş bırakılamaz.")
+        print("İşlenen veri: Kullanıcı girişi")
 
     calistir_pipeline(evrak_metni)
 
