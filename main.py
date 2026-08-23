@@ -5,6 +5,7 @@ import unicodedata
 from pathlib import Path
 
 from gorev1 import calistir_gorev1
+from gorev2 import calistir_gorev2
 
 
 DESKTOP_KOK = Path.home() / "OneDrive" / "Desktop"
@@ -63,30 +64,63 @@ def _argumanlari_oku() -> argparse.Namespace:
     return parser.parse_args()
 
 
+ORNEK_DILEKCE = """
+Atatürk Üniversitesi Fen Fakültesi Dekanlığına,
+
+Fakülteniz Fizik Bölümü 2. sınıf 220101001 numaralı öğrencisiyim. 12 Kasım 2025 tarihinde yapılan "Klasik Mekanik" dersi vize (ara sınav) sonucumun 42 olarak açıklandığını gördüm. Sınav kâğıdımın maddi hata yönünden tekrar incelenmesini ve hak ettiğim notun verilmesini talep ediyorum.
+
+Gereğini bilgilerinize saygılarımla arz ederim.
+
+Ad Soyad: Emre Karadağ
+T.C. Kimlik No: 27584916302
+Tarih: 14.11.2025
+E-posta: emre.karadag@email.com
+Telefon: 0555 123 4567
+Adres: Fen Fakültesi Öğrenci Yurdu B Blok, Erzurum
+"""
+
+
+def calistir_pipeline(evrak_metni: str) -> None:
+    """Ham evrak metnini Görev 1 ve Görev 2'den geçirerek nihai sonucu ekrana basar."""
+    print("--- 1. AŞAMA: GÖREV 1 (EVRAK ANALİZİ) BAŞLATILIYOR ---")
+    gorev1_sonuc = calistir_gorev1(evrak_metni)
+    print("\n[Görev 1 Tamamlandı. Çıktı Şeması Başarıyla Oluşturuldu.]")
+    print(json.dumps(gorev1_sonuc.model_dump(), ensure_ascii=False, indent=2))
+    
+    print("\n--- 2. AŞAMA: GÖREV 2 (YÖNLENDİRME VE TASLAK HAZIRLAMA) BAŞLATILIYOR ---")
+    gorev2_sonuc = calistir_gorev2(gorev1_sonuc)
+    print("\n[Görev 2 Tamamlandı. Nihai Karar ve Resmî Yazı Taslağı:]")
+    print(json.dumps(gorev2_sonuc.model_dump(), ensure_ascii=False, indent=2))
+
+
 def main() -> None:
     args = _argumanlari_oku()
     evrak_dosyasi = args.file
+    evrak_metni = None
 
     if evrak_dosyasi:
         if not evrak_dosyasi.exists():
             raise FileNotFoundError(f"Evrak dosyasi bulunamadi: {evrak_dosyasi}")
         evrak_metni = _okuma_metni(evrak_dosyasi)
+        print(f"İşlenen dosya: {evrak_dosyasi}")
     elif not sys.stdin.isatty():
         evrak_dosyasi = None
-        evrak_metni = sys.stdin.read()
+        evrak_metni = sys.stdin.read().strip()
+        if not evrak_metni:
+            print("Standart girdi boş veya bulunamadı. Örnek senaryo (dilekçe metni) çalıştırılıyor...\n")
+            evrak_metni = ORNEK_DILEKCE
+        else:
+            print("İşlenen veri: Standart girdi (stdin)")
     else:
-        evrak_dosyasi = _bul_evrak_dosyasi()
-        evrak_metni = _okuma_metni(evrak_dosyasi)
+        try:
+            evrak_dosyasi = _bul_evrak_dosyasi()
+            evrak_metni = _okuma_metni(evrak_dosyasi)
+            print(f"İşlenen dosya: {evrak_dosyasi}")
+        except FileNotFoundError:
+            print("Masaüstünde evrak dosyası bulunamadı. Örnek senaryo (dilekçe metni) çalıştırılıyor...\n")
+            evrak_metni = ORNEK_DILEKCE
 
-    sonuc = calistir_gorev1(evrak_metni)
-
-    if evrak_dosyasi:
-        print(f"Islenen dosya: {evrak_dosyasi}")
-    print(json.dumps(
-        sonuc.model_dump(),
-        ensure_ascii=False,
-        indent=2,
-    ))
+    calistir_pipeline(evrak_metni)
 
 
 if __name__ == "__main__":

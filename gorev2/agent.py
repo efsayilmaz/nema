@@ -6,6 +6,7 @@ from typing import Dict, Any, Union, Optional
 
 from dotenv import load_dotenv
 from groq import Groq
+from pydantic import BaseModel
 
 from gorev2.schemas import (
     Gorev2CiktiSemasi,
@@ -45,9 +46,9 @@ Tüm alan adlarına (%100 birebir aynı key'ler) ve belirtilen enum değerlerine
 """
 
 
-def _normalize_input(girdi_verisi: Union[dict, str, Gorev1CiktiSemasi]) -> str:
+def _normalize_input(girdi_verisi: Union[dict, str, BaseModel, Gorev1CiktiSemasi]) -> str:
     """Görev 1 girdisini JSON string formatına dönüştürür."""
-    if isinstance(girdi_verisi, Gorev1CiktiSemasi):
+    if isinstance(girdi_verisi, BaseModel) or hasattr(girdi_verisi, "model_dump_json"):
         return girdi_verisi.model_dump_json(indent=2, exclude_none=False)
     elif isinstance(girdi_verisi, dict):
         return json.dumps(girdi_verisi, ensure_ascii=False, indent=2)
@@ -62,7 +63,7 @@ def _normalize_input(girdi_verisi: Union[dict, str, Gorev1CiktiSemasi]) -> str:
 
 
 def calistir_gorev2(
-    girdi_verisi: Union[dict, str, Gorev1CiktiSemasi],
+    girdi_verisi: Union[dict, str, BaseModel, Gorev1CiktiSemasi],
     api_key: Optional[str] = None,
     model_name: str = "qwen/qwen3.6-27b"
 ) -> Gorev2CiktiSemasi:
