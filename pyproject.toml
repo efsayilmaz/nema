@@ -1,0 +1,6 @@
+[tool.pyright]
+include = ["gorev1", "main.py"]
+typeCheckingMode = "basic"
+
+[tool.ruff]
+line-length = 100
