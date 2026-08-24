@@ -65,11 +65,9 @@ Girdi: Görev 1'in tam çıktısı ({"analiz_sonucu": {...}, "ek_bilgi": "..." v
 ===================================================================
 BEKLENEN UÇ NOKTALAR
 ===================================================================
-POST {BASE_URL}/api/gorev1   body: {"evrak_metni": "<string>"}      -> Görev 1 şeması
-POST {BASE_URL}/api/gorev2   body: {"analiz_sonucu": {...}, "ek_bilgi": "<string|null>"} -> Görev 2 şeması
-
-Backend'in alan adları farklıysa SADECE `_map_gorev1_response` /
-`_map_gorev2_response` fonksiyonlarını güncelle.
+POST {BASE_URL}/api/v1/evrak-isle
+body (Görev 1 için): {"ham_metin": "<string>"}
+body (Görev 2 için): {"ham_metin": "", "gorev1_ciktisi": {...}, "ek_bilgi": "<string|null>"}
 """
 
 import re
@@ -377,10 +375,11 @@ def gorev1_analiz(evrak_metni, base_url=None, demo_mode=True, log=None):
         return sonuc, log, None
 
     try:
-        r = requests.post(f"{base_url.rstrip('/')}/api/gorev1",
-                           json={"evrak_metni": evrak_metni}, timeout=REQUEST_TIMEOUT_SN)
+        r = requests.post(f"{base_url.rstrip('/')}/api/v1/gorev1",
+                           json={"ham_metin": evrak_metni}, timeout=REQUEST_TIMEOUT_SN)
         r.raise_for_status()
-        sonuc = _map_gorev1_response(r.json())
+        state_response = r.json()
+        sonuc = _map_gorev1_response(state_response.get("gorev1_ciktisi", {}))
         _log_ekle(log, "Evrak Analiz Ajanı", evrak_metni, sonuc["evrak_turu"], time.time() - t0, "backend")
         return sonuc, log, None
     except Exception as exc:
@@ -407,11 +406,12 @@ def gorev2_taslak(analiz_sonucu, ek_bilgi=None, base_url=None, demo_mode=True, l
         return sonuc, log, None
 
     try:
-        r = requests.post(f"{base_url.rstrip('/')}/api/gorev2",
-                           json={"analiz_sonucu": analiz_sonucu, "ek_bilgi": ek_bilgi},
+        r = requests.post(f"{base_url.rstrip('/')}/api/v1/gorev2",
+                           json={"gorev1_ciktisi": analiz_sonucu, "ek_bilgi": ek_bilgi},
                            timeout=REQUEST_TIMEOUT_SN)
         r.raise_for_status()
-        sonuc = _map_gorev2_response(r.json())
+        state_response = r.json()
+        sonuc = _map_gorev2_response(state_response.get("gorev2_ciktisi", {}))
         _log_ekle(log, "Yazı Taslaklama ve Yönlendirme Ajanı", girdi_ozeti,
                   sonuc["yonlendirme_karari"]["geregi_icin_yonlendirilecek_birim"], time.time() - t0, "backend")
         return sonuc, log, None

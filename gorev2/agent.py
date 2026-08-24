@@ -43,6 +43,7 @@ Verilen evrak analizini dikkatle inceleyerek aşağıdaki üç temel bileşenden
    - `sistem_aksiyon_durumu`: Yalnızca şu 3 değerden biri olmalıdır: "Kullanıcı Bekleniyor", "İşleme Alındı", "Onay Bekliyor".
 
 Tüm alan adlarına (%100 birebir aynı key'ler) ve belirtilen enum değerlerine harfiyen uy.
+YALNIZCA geçerli bir JSON nesnesi döndür. Markdown, açıklama veya düşünme metni YAZMA.
 """
 
 
@@ -105,12 +106,12 @@ Beklenen JSON Şeması:
                 model=model_name,
                 messages=messages,
                 temperature=0.1,
-                max_tokens=5000
+                max_tokens=4000
             )
 
             raw_text = response.choices[0].message.content.strip()
 
-            # <think>...</think> düşünce bloklarını temizle (Qwen / DeepSeek modelleri için)
+            # <think>...</think> düşünce bloklarını temizle
             if "<think>" in raw_text:
                 if "</think>" in raw_text:
                     raw_text = raw_text.split("</think>")[-1].strip()
@@ -118,10 +119,9 @@ Beklenen JSON Şeması:
                     raw_text = re.sub(r"^<think>.*?(?=\{)", "", raw_text, flags=re.DOTALL).strip()
 
             # Markdown kod blokları varsa temizle
-            if "```" in raw_text:
-                raw_text = re.sub(r"^```(?:json)?\s*", "", raw_text)
-                raw_text = re.sub(r"\s*```$", "", raw_text)
-                raw_text = raw_text.strip()
+            raw_text = re.sub(r"^```(?:json)?\s*", "", raw_text, flags=re.MULTILINE)
+            raw_text = re.sub(r"\s*```\s*$", "", raw_text, flags=re.MULTILINE)
+            raw_text = raw_text.strip()
 
             # Geçerli JSON nesnesini bul ({ ile } arasındaki en dış blok)
             start_idx = raw_text.find("{")
@@ -129,7 +129,21 @@ Beklenen JSON Şeması:
             if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
                 raw_text = raw_text[start_idx:end_idx + 1]
 
-            return Gorev2CiktiSemasi.model_validate_json(raw_text)
+            # JSON yorum satırlarını temizle (// ... ve /* ... */)
+            raw_text = re.sub(r"//[^\n]*", "", raw_text)
+            raw_text = re.sub(r"/\*.*?\*/", "", raw_text, flags=re.DOTALL)
+
+            # Trailing comma'ları temizle (], } öncesindeki virgüller)
+            raw_text = re.sub(r",\s*([}\]])", r"\1", raw_text)
+
+            # Önce JSON olarak doğrulamayı dene
+            try:
+                return Gorev2CiktiSemasi.model_validate_json(raw_text)
+            except Exception:
+                # JSON parse edip dict üzerinden doğrula
+                payload = json.loads(raw_text)
+                return Gorev2CiktiSemasi.model_validate(payload)
+
         except Exception as e:
             son_hata = e
             hata_str = str(e).lower()

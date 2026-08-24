@@ -9,9 +9,19 @@ from openai import OpenAI
 from pydantic import ValidationError
 
 from gorev1.schemas import Gorev1CiktiSemasi
+from rag import MevzuatRAG
 
 warnings.filterwarnings("ignore")
 MAX_INPUT_CHARACTERS = 6000
+
+# Performans için RAG sistemini global olarak önbellekte (cache) tutalım
+_RAG_SISTEMI = None
+
+def get_rag_sistemi() -> MevzuatRAG:
+    global _RAG_SISTEMI
+    if _RAG_SISTEMI is None:
+        _RAG_SISTEMI = MevzuatRAG()
+    return _RAG_SISTEMI
 
 
 def _load_env_file(path: Path) -> None:
@@ -124,6 +134,9 @@ def calistir_gorev1(
     )
     input_text = _normalize_input(evrak_metni)
 
+    rag = get_rag_sistemi()
+    mevzuat_baglami = rag.mevzuat_sorgula(input_text, getirilecek_sonuc_sayisi=2)
+
     prompt = f"""
 Aşağıdaki tek ham evrakı analiz et ve Görev 1 çıktısını oluştur.
 
@@ -131,6 +144,10 @@ HAM EVRAK:
 --------------------
 {input_text}
 --------------------
+
+SİSTEMDEN GELEN İLGİLİ MEVZUAT BAĞLAMI:
+{mevzuat_baglami}
+Lütfen Görev 1 analizini yaparken, uydurma kanunlar yazmak yerine SADECE yukarıda verilen mevzuat bağlamını kullan.
 
 Yalnızca aşağıdaki anahtarları kullanarak tek bir JSON nesnesi döndür:
 {{"evrak_turu":"...","konu":"...","evrak_tarihi":null,

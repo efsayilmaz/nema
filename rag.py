@@ -47,25 +47,40 @@ if __name__ == "__main__":
     # 1. Gerçek Kanun Maddelerinden Oluşan Çekirdek Veri Seti
     gercek_mevzuat_metinleri = [
         "3071 Sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun Madde 4: Türkiye Büyük Millet Meclisine veya yetkili makamlara verilen veya gönderilen dilekçelerde, dilekçe sahibinin adı, soyadı ve imzası ile iş veya ikametgâh adresinin bulunması zorunludur.",
+        "3071 Sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun Madde 7: Türk vatandaşlarının ve Türkiye’de ikamet eden yabancıların kendileri ve kamu ile ilgili dilek ve şikayetleri konusunda yetkili makamlara yaptıkları başvuruların sonucu veya yapılmakta olan işlemin safahatı hakkında dilekçe sahiplerine en geç otuz gün içinde gerekçeli olarak cevap verilir.",
+        "4982 Sayılı Bilgi Edinme Hakkı Kanunu Madde 4: Herkes bilgi edinme hakkına sahiptir. Türkiye'de ikamet eden yabancılar ve Türkiye'de faaliyette bulunan yabancı tüzel kişiler, isteyecekleri bilgi kendileriyle veya faaliyet alanlarıyla ilgili olmak kaydıyla ve karşılıklılık ilkesi çerçevesinde, bu Kanun hükümlerinden yararlanırlar.",
+        "4982 Sayılı Bilgi Edinme Hakkı Kanunu Madde 5: Kurum ve kuruluşlar, bu Kanunda yer alan istisnalar dışındaki her türlü bilgi veya belgeyi başvuranların yararlanmasına sunmak ve bilgi edinme başvurularını etkin, süratli ve doğru sonuçlandırmak üzere, gerekli idarî ve teknik tedbirleri almakla yükümlüdürler.",
         "4982 Sayılı Bilgi Edinme Hakkı Kanunu Madde 6: Bilgi edinme başvurusu, başvuru sahibinin adı ve soyadı, imzası, oturma yeri veya iş adresini, başvuru sahibi tüzel kişi ise tüzel kişinin unvanı ve adresi ile yetkili kişinin imzasını ve yetki belgesini içeren dilekçeyle istenen kurum ve kuruluşa yapılır.",
+        "6502 Sayılı Tüketicinin Korunması Hakkında Kanun (Ayıplı Mal): Malın ayıplı olduğunun anlaşılması durumunda tüketici; satılanı geri vermeye hazır olduğunu bildirerek sözleşmeden dönme, satılanı alıkoyup ayıp oranında satış bedelinden indirim isteme, aşırı bir masraf gerektirmediği takdirde bütün masrafları satıcıya ait olmak üzere satılanın ücretsiz onarılmasını isteme haklarından birini kullanabilir.",
         "5199 Sayılı Hayvanları Koruma Kanunu Madde 6: Sahipsiz veya güçten düşmüş hayvanların en hızlı şekilde yerel yönetimlerce kurulan veya izin verilen hayvan bakımevlerine götürülmesi zorunludur. Bu hayvanların öncelikle söz konusu merkezlerde oluşturulacak müşahede yerlerinde tutulması sağlanır.",
-        "6502 Sayılı Tüketicinin Korunması Hakkında Kanun Madde 11: Malın ayıplı olduğunun anlaşılması durumunda tüketici; satılanı geri vermeye hazır olduğunu bildirerek sözleşmeden dönme, satılanı alıkoyup ayıp oranında satış bedelinden indirim isteme, aşırı bir masraf gerektirmediği takdirde bütün masrafları satıcıya ait olmak üzere satılanın ücretsiz onarılmasını isteme haklarından birini kullanabilir.",
-        "Resmî Yazışmalarda Uygulanacak Usul ve Esaslar Hakkında Yönetmelik Madde 14: İlgi, yazılan yazının önceki bir yazıya ek ya da karşılık olduğunu veya bazı belgelere başvurulması gerektiğini belirten bölümdür. İlgi yan başlığı, muhatap bölümünün son satırından itibaren iki satır boşluk bırakılarak ve yazı alanının sol sınırından başlanarak yazılır."
+        "6698 Sayılı Kişisel Verilerin Korunması Kanunu Madde 11: Herkes, veri sorumlusuna başvurarak kendisiyle ilgili kişisel veri işlenip işlenmediğini öğrenme, kişisel verileri işlenmişse buna ilişkin bilgi talep etme, kişisel verilerin işlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme, eksik veya yanlış işlenmiş olması hâlinde bunların düzeltilmesini isteme haklarına sahiptir.",
+        "5393 Sayılı Belediye Kanunu Madde 14: Belediye, mahallî müşterek nitelikte olmak şartıyla; imar, su ve kanalizasyon, ulaşım gibi kentsel alt yapı; çevre ve çevre sağlığı, temizlik ve katı atık; zabıta, itfaiye, acil yardım, kurtarma ve ambulans; şehir içi trafik; defin ve mezarlıklar; ağaçlandırma, park ve yeşil alanlar; sosyal hizmet ve yardım hizmetlerini yapar veya yaptırır.",
+        "Resmî Yazışmalarda Uygulanacak Usul ve Esaslar Hakkında Yönetmelik Madde 14: İlgi, yazılan yazının önceki bir yazıya ek ya da karşılık olduğunu veya bazı belgelere başvurulması gerektiğini belirten bölümdür."
     ]
     
     # 2. Benzersiz ID'ler ve Filtreleme İçin Metadatalar
     gercek_idler = [
         "mevzuat_3071_m4", 
+        "mevzuat_3071_m7",
+        "mevzuat_4982_m4",
+        "mevzuat_4982_m5",
         "mevzuat_4982_m6", 
+        "mevzuat_6502_m11",
         "mevzuat_5199_m6", 
-        "mevzuat_6502_m11", 
+        "mevzuat_6698_m11",
+        "mevzuat_5393_m14",
         "yonetmelik_resmi_yazisma_m14"
     ]
     gercek_metadatalar = [
         {"kategori": "Dilekce ve Eksik Bilgi", "kanun": "3071"},
+        {"kategori": "Dilekce ve Yanit Suresi", "kanun": "3071"},
         {"kategori": "Bilgi Edinme", "kanun": "4982"},
-        {"kategori": "Sokak Hayvanlari", "kanun": "5199"},
+        {"kategori": "Bilgi Edinme", "kanun": "4982"},
+        {"kategori": "Bilgi Edinme", "kanun": "4982"},
         {"kategori": "Tuketici Haklari", "kanun": "6502"},
+        {"kategori": "Sokak Hayvanlari", "kanun": "5199"},
+        {"kategori": "Kisisel Veriler (KVKK)", "kanun": "6698"},
+        {"kategori": "Belediye Hizmetleri", "kanun": "5393"},
         {"kategori": "Yazisma Kurallari", "yonetmelik": "Resmi Yazisma"}
     ]
     

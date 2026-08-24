@@ -9,6 +9,7 @@ yapılandırılmış çıktıların Pydantic veri şemalarını içerir.
 from enum import Enum
 from typing import List, Optional, Any
 from pydantic import BaseModel, Field, field_validator
+from gorev1.schemas import Gorev1CiktiSemasi
 
 
 class YaziTuru(str, Enum):
@@ -124,34 +125,3 @@ class Gorev2CiktiSemasi(BaseModel):
         ...,
         description="Kullanıcı bilgilendirme ve sistem aksiyon durumu"
     )
-
-
-# --- Görev 1 Girdi Şemaları ---
-
-class GonderenSemasi(BaseModel):
-    """Görev 1 evrakı gönderen bilgisi şeması."""
-    gonderen_tipi: Optional[str] = Field(default=None, description="Gönderen tipi (örn: Gerçek Kişi, Tüzel Kişi / Şirket, Kamu Kurumu)")
-    ad_soyad_veya_unvan: Optional[str] = Field(default=None, description="Ad soyad veya unvan")
-    kimlik_veya_vergi_no: Optional[str] = Field(default=None, description="T.C. Kimlik veya Vergi Numarası")
-    iletisim_bilgisi: Optional[str] = Field(default=None, description="İletişim adresi / telefon")
-
-
-class VarliklarSemasi(BaseModel):
-    """Görev 1 varlıklar (kurumlar, lokasyonlar, tarihler) şeması."""
-    kurumlar: List[str] = Field(default_factory=list, description="Metinde geçen kurumlar")
-    lokasyonlar: List[str] = Field(default_factory=list, description="Metinde geçen lokasyonlar")
-    tarihler: List[str] = Field(default_factory=list, description="Metinde geçen tarihler")
-
-
-class Gorev1CiktiSemasi(BaseModel):
-    """Görev 1 girdi veri şeması."""
-    evrak_turu: Optional[str] = Field(default=None, description="Evrak türü")
-    konu: Optional[str] = Field(default=None, description="Evrak konusu")
-    evrak_tarihi: Optional[str] = Field(default=None, description="Evrak tarihi")
-    sayi_veya_kayit_no: Optional[str] = Field(default=None, description="Sayı veya kayıt numarası")
-    gonderen: Optional[GonderenSemasi] = Field(default=None, description="Gönderen bilgileri")
-    kisa_ozet: Optional[str] = Field(default=None, description="Evrak kısa özeti")
-    varliklar: Optional[VarliklarSemasi] = Field(default=None, description="Varlıklar (kurum, lokasyon, tarih)")
-    ilgili_mevzuat_onerisi: List[str] = Field(default_factory=list, description="İlgili mevzuat önerileri")
-    eksik_bilgiler: List[str] = Field(default_factory=list, description="Tespiti yapılan eksik bilgiler")
-    aciliyet_durumu: Optional[str] = Field(default=None, description="Aciliyet durumu (Normal, İvedi, Çok İvedi vb.)")

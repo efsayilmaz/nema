@@ -1,6 +1,12 @@
+from enum import Enum
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
+
+class AciliyetDurumu(str, Enum):
+    NORMAL = "Normal"
+    IVEDI = "İvedi"
+    COK_IVEDI = "Çok İvedi"
 
 
 class GonderenSemasi(BaseModel):
@@ -28,4 +34,4 @@ class Gorev1CiktiSemasi(BaseModel):
     varliklar: VarliklarSemasi
     ilgili_mevzuat_onerisi: List[str] = Field(default_factory=list)
     eksik_bilgiler: List[str] = Field(default_factory=list)
-    aciliyet_durumu: str
+    aciliyet_durumu: AciliyetDurumu
