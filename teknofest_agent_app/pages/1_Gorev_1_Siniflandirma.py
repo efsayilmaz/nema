@@ -1,4 +1,14 @@
 import streamlit as st
+import sys
+import os
+import tempfile
+
+# Proje kök dizinini sys.path'e ekleyelim ki evrak_okuyucu bulunabilsin
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+try:
+    from evrak_okuyucu import evrak_oku
+except ImportError:
+    evrak_oku = None
 
 from utils.backend_client import gorev1_analiz
 from utils.sample_data import SAMPLE_DOCS
@@ -143,6 +153,7 @@ st.markdown(
 for key, value in {
     "backend_url": "", "demo_mode": True, "evrak_metni": "",
     "gorev1_sonuc": None, "gorev2_sonuc": None, "ajan_log": [],
+    "islenen_dosya": None,
 }.items():
     if key not in st.session_state:
         st.session_state[key] = value
@@ -169,38 +180,56 @@ secim = st.selectbox("Örnek evrak seç (opiyonel)", ["— Seçiniz —"] + [d["
 if secim != "— Seçiniz —":
     secilen = next(d for d in SAMPLE_DOCS if d["baslik"] == secim)
     st.session_state.evrak_metni = secilen["metin"]
-
-st.session_state.evrak_metni = st.text_area(
-    "Evrak metni", value=st.session_state.evrak_metni, height=200,
-    placeholder="Evrak metnini buraya yapıştırın...",
-)
+    st.session_state.islenen_dosya = None
 
 yuklenen = st.file_uploader(
-    "veya bir dosya yükleyin (.txt, .pdf, .png, .jpg, .jpeg)",
-    type=["txt", "pdf", "png", "jpg", "jpeg"],
-    help="Taranmış/görsel evraklar için OCR işlemi backend tarafında yapılır "
-         "(bkz. Şartname madde 6.4.1). Bu arayüz dosyayı sadece backend'e iletir.",
+    "Veya bir dosya yükleyin (.txt, .pdf, .png, .jpg, .jpeg, .docx)",
+    type=["txt", "pdf", "png", "jpg", "jpeg", "docx"],
+    help="Yüklenen dosyalar OCR ve metin çıkarma modülüyle analiz edilip metin kutusuna aktarılır.",
 )
+
 if yuklenen is not None:
-    if yuklenen.name.lower().endswith(".txt"):
-        st.session_state.evrak_metni = yuklenen.read().decode("utf-8", errors="ignore")
-        st.session_state.yuklenen_dosya = None
-    else:
-        # .pdf / .png / .jpg / .jpeg — OCR bu arayüzde değil, backend'de yapılır.
-        st.session_state.yuklenen_dosya = {
-            "ad": yuklenen.name,
-            "tur": yuklenen.type,
-            "veri": yuklenen.getvalue(),
-        }
-        if yuklenen.type in ("image/png", "image/jpeg"):
-            st.image(yuklenen, caption=yuklenen.name, width=300)
+    # Dosya değişmişse veya ilk defa yüklenmişse OCR çalışsın
+    if st.session_state.get("islenen_dosya") != yuklenen.name:
+        if evrak_oku is None:
+            st.error("evrak_okuyucu modülü yüklenemedi!")
         else:
-            st.markdown(f"📄 **{yuklenen.name}** yüklendi.")
-        st.info(
-            "Bu dosya OCR ile okunmak üzere backend'e gönderilecektir; demo modunda "
-            "OCR simüle edilmez. Şimdilik test edebilmek için evrak metnini yukarıdaki "
-            "kutuya elle yapıştırabilir ya da bir örnek senaryo seçebilirsiniz."
-        )
+            with st.spinner(f"{yuklenen.name} okunuyor... (OCR işlemi gerekliyse birkaç saniye sürebilir)"):
+                uzanti = os.path.splitext(yuklenen.name)[1].lower()
+                # Temp dosya oluştur
+                with tempfile.NamedTemporaryFile(delete=False, suffix=uzanti) as tmp_file:
+                    tmp_file.write(yuklenen.getvalue())
+                    tmp_path = tmp_file.name
+                
+                try:
+                    sonuc = evrak_oku(tmp_path)
+                    if "hata" in sonuc:
+                        st.error(f"Dosya okuma hatası: {sonuc['hata']}")
+                    else:
+                        st.session_state.evrak_metni = sonuc.get("ham_metin", "")
+                        st.session_state.islenen_dosya = yuklenen.name
+                        if sonuc.get("guven_notu"):
+                            st.warning(sonuc["guven_notu"])
+                        st.success(f"Dosya okundu: {yuklenen.name} ({sonuc.get('okuma_yontemi')})")
+                        st.rerun() # Metin alanını güncellemek için sayfayı yeniden yükle
+                finally:
+                    if os.path.exists(tmp_path):
+                        os.remove(tmp_path)
+
+    # İşlenmiş dosyayı görsel olarak önizle
+    if yuklenen.type in ("image/png", "image/jpeg"):
+        st.image(yuklenen, caption=yuklenen.name, width=250)
+    else:
+        st.markdown(f"📄 **{yuklenen.name}** sisteme aktarıldı.")
+else:
+    st.session_state.islenen_dosya = None
+
+st.session_state.evrak_metni = st.text_area(
+    "Evrak metni (Üzerinde değişiklik yapabilirsiniz)", 
+    value=st.session_state.evrak_metni, 
+    height=250,
+    placeholder="Evrak metnini buraya yapıştırın veya yukarıdan bir dosya yükleyin...",
+)
 
 calistir = st.button(
     " Evrakı analiz et",

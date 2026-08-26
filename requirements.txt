@@ -5,3 +5,8 @@ pydantic>=2.0.0
 pytest>=8.0.0
 fastapi>=0.110.0
 uvicorn[standard]>=0.29.0
+pypdf
+pytesseract
+pdf2image
+python-docx
+Pillow
