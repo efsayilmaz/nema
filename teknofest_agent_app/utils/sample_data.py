@@ -318,4 +318,98 @@ SAMPLE_DOCS = [
             },
         },
     },
+    {
+        "baslik": "Öğrenci Not İtirazı / Maddi Hata Dilekçesi",
+        "metin": (
+            "İSTANBUL ÜNİVERSİTESİ\nMÜHENDİSLİK FAKÜLTESİ DEKANLIĞI'NA\n\n"
+            "Konu: Sınav Notuna İtiraz ve Maddi Hata İnceleme Talebi\n\n"
+            "Fakülteniz Bilgisayar Mühendisliği Bölümü 220101045 numaralı 3. sınıf öğrencisiyim. "
+            "2025-2026 Eğitim-Öğretim Yılı Güz Yarıyılı \"Algoritmalar ve Veri Yapıları\" dersinin "
+            "12.01.2026 tarihinde ilan edilen final sınavı sonucunda tarafıma 45 (kırk beş) notu takdir edilmiştir. "
+            "Sınav kağıdımı incelediğimde, 2. ve 4. sorularda yer alan algoritmik çözümlerimin ve karmaşıklık "
+            "analizlerimin tam ve doğru olmasına rağmen puanlamaya dahil edilmediğini veya toplama hatası "
+            "yapıldığını düşünmekteyim.\n\n"
+            "2547 Sayılı Yükseköğretim Kanunu (Madde 14 ve 44), Yükseköğretim Kurumları Lisans Eğitim-Öğretim "
+            "ve Sınav Yönetmeliği'nin ilgili maddi hata hükümleri (5 iş günü içinde itiraz) ve 3071 Sayılı Dilekçe "
+            "Hakkının Kullanılmasına Dair Kanun (Madde 7) uyarınca, final sınav kağıdımın maddi hata yönünden tekrar "
+            "incelenerek notumun yeniden değerlendirilmesini ve yasal süresi içinde sonucun tarafıma bildirilmesini "
+            "saygılarımla arz ederim.\n\n"
+            "Ad Soyad: Ahmet Yılmaz\n"
+            "Öğrenci No: 220101045\n"
+            "T.C. Kimlik No: 12345678901\n"
+            "Telefon: 0532 111 22 33\n"
+            "E-posta: ahmetyilmaz@ogr.istanbul.edu.tr\n"
+            "Tarih: 15.01.2026\n\n"
+            "İmza: [imzalı]"
+        ),
+        "gorev1": {
+            "evrak_turu": "Dilekçe",
+            "konu": "Sınav Notuna İtiraz ve Maddi Hata İnceleme Talebi",
+            "evrak_tarihi": "15.01.2026",
+            "sayi_veya_kayit_no": None,
+            "gonderen": {
+                "gonderen_tipi": "Gerçek Kişi",
+                "ad_soyad_veya_unvan": "Ahmet Yılmaz",
+                "kimlik_veya_vergi_no": "12345678901",
+                "iletisim_bilgisi": "0532 111 22 33, ahmetyilmaz@ogr.istanbul.edu.tr",
+            },
+            "kisa_ozet": (
+                "Bilgisayar Mühendisliği 3. sınıf öğrencisi Ahmet Yılmaz, Algoritmalar ve Veri Yapıları dersi "
+                "final sınavından aldığı 45 nota, 2. ve 4. sorulardaki çözümlerinin doğru olduğu ve puanlama/toplama "
+                "hatası bulunduğu gerekçesiyle maddi hata incelemesi yapılması talebiyle itiraz etmektedir."
+            ),
+            "varliklar": {
+                "kurumlar": [
+                    "İstanbul Üniversitesi Mühendislik Fakültesi Dekanlığı",
+                    "Bilgisayar Mühendisliği Bölümü",
+                ],
+                "lokasyonlar": [],
+                "tarihler": ["2025-2026 Eğitim-Öğretim Yılı Güz Yarıyılı", "12.01.2026", "15.01.2026"],
+            },
+            "ilgili_mevzuat_onerisi": [
+                "2547 Sayılı Yükseköğretim Kanunu (Madde 14 ve 44)",
+                "Yükseköğretim Kurumları Lisans Eğitim-Öğretim ve Sınav Yönetmeliği (Maddi Hata Maddesi)",
+                "3071 Sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun (Madde 7)",
+            ],
+            "eksik_bilgiler": [],
+            "aciliyet_durumu": "Normal",
+        },
+        "gorev2": {
+            "yonlendirme_karari": {
+                "islem_yapacak_ana_kurum": "İstanbul Üniversitesi Mühendislik Fakültesi Dekanlığı",
+                "geregi_icin_yonlendirilecek_birim": "Bilgisayar Mühendisliği Bölüm Başkanlığı",
+                "bilgi_icin_iletilecek_birimler": [
+                    "Öğrenci İşleri Dekanlık Birimi",
+                ],
+                "yonlendirme_gerekcesi": (
+                    "2547 Sayılı Yükseköğretim Kanunu ve Lisans Eğitim-Öğretim ve Sınav Yönetmeliği uyarınca, "
+                    "öğrencinin sınav notuna ilişkin maddi hata başvurusunun dersin sorumlu öğretim üyesi ve "
+                    "bölüm komisyonu tarafından incelenmesi zorunluluğu."
+                ),
+            },
+            "resmi_yazi_taslagi": {
+                "yazi_turu": "Üst Yazı",
+                "konu": "Sınav Notu Maddi Hata İtirazı İncelemesi (Ahmet Yılmaz)",
+                "ilgi": "220101045 numaralı öğrenci Ahmet Yılmaz'ın 15.01.2026 tarihli dilekçesi.",
+                "govde_metni": (
+                    "İlgide kayıtlı dilekçe ile Bölümünüz 3. sınıf öğrencisi Ahmet Yılmaz, 2025-2026 Güz "
+                    "Yarıyılı 'Algoritmalar ve Veri Yapıları' dersi final sınavı notuna maddi hata itirazında "
+                    "bulunmuştur.\n\n"
+                    "Yükseköğretim Kurumları Lisans Eğitim-Öğretim ve Sınav Yönetmeliği'nin maddi hata incelemesi "
+                    "hükümleri uyarınca, sınav evrakının dersin sorumlu öğretim üyesi tarafından incelenerek "
+                    "düzenlenecek değerlendirme raporunun yasal süresi içinde Dekanlığımıza iletilmesi "
+                    "hususunda gereğini rica ederim."
+                ),
+                "imza_makami": "Dekan Yardımcısı",
+            },
+            "kullanici_bilgilendirme": {
+                "kullaniciya_gosterilecek_mesaj": (
+                    "Algoritmalar ve Veri Yapıları dersi sınav notu itiraz dilekçeniz dekanlık kayıtlarına "
+                    "alınmış olup, maddi hata incelemesi yapılmak üzere Bilgisayar Mühendisliği Bölüm Başkanlığına "
+                    "iletilmiştir. İnceleme sonucu 3071 sayılı Kanun kapsamında 30 gün içinde tarafınıza bildirilecektir."
+                ),
+                "sistem_aksiyon_durumu": "İşleme Alındı",
+            },
+        },
+    },
 ]

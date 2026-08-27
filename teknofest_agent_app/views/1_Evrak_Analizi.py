@@ -170,6 +170,6 @@ if st.session_state.gorev1_sonuc:
 
     st.divider()
     st.page_link(
-        "pages/2_Gorev_2_Taslak_Yonlendirme.py",
+        "views/2_Taslak_Olusturma.py",
         label="→  Yazı Taslağı Oluştur",
     )
