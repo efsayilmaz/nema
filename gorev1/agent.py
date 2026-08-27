@@ -140,6 +140,21 @@ def _normalize_payload(payload: dict) -> dict:
                 ) if value
             ) or None,
         }
+        
+    aciliyet = payload.get("aciliyet_durumu", "")
+    if isinstance(aciliyet, str):
+        aciliyet_lower = aciliyet.lower()
+        if any(w in aciliyet_lower for w in ["çok acil", "çok ivedi"]):
+            payload["aciliyet_durumu"] = "Çok İvedi"
+        elif any(w in aciliyet_lower for w in ["acil", "yüksek", "ivedi"]):
+            payload["aciliyet_durumu"] = "İvedi"
+        elif aciliyet_lower in ["normal", "düşük", "dusuk", "yok", "belirtilmemiş"]:
+            payload["aciliyet_durumu"] = "Normal"
+        elif aciliyet_lower not in ["normal", "ivedi", "çok ivedi"]:
+            payload["aciliyet_durumu"] = "Normal"
+    elif aciliyet is None:
+        payload["aciliyet_durumu"] = "Normal"
+
     return payload
 
 
