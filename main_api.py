@@ -1,12 +1,14 @@
-from typing import Any, Dict, Optional
+import json
+from typing import Any, Dict, Optional, cast
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from gorev1.agent import calistir_gorev1
 from gorev2.agent import calistir_gorev2
 from langgraph_akis import ajan_uygulamasi
+from belge_isleme import MAKS_DOSYA_BOYUTU_MB, belgeden_metin_cikar
 
 app = FastAPI(title="Kamu Evrak Agent Backend - TEKNOFEST")
 
@@ -37,12 +39,40 @@ class Gorev2Istek(BaseModel):
     gorev1_ciktisi: Dict[str, Any]
     ek_bilgi: Optional[str] = None
 
+
+@app.post("/analiz")
+async def analiz_et(dosya: UploadFile = File(...)):
+    icerik = await dosya.read()
+    if len(icerik) > MAKS_DOSYA_BOYUTU_MB * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Dosya boyutu çok büyük (maksimum 15 MB).")
+    try:
+        ham_metin = belgeden_metin_cikar(icerik, dosya.filename or "")
+        sonuc = calistir_gorev1(ham_metin)
+        gorev1_ciktisi = sonuc.model_dump(mode="json")
+        return {
+            "gorev1_ciktisi": gorev1_ciktisi,
+            "ham_metin": ham_metin,
+            "ham_json": json.dumps({"gorev1": gorev1_ciktisi}, ensure_ascii=False, indent=2),
+        }
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Belge analizi sırasında hata oluştu: {exc}") from exc
+
 @app.post("/api/v1/gorev1")
 def sadece_gorev1(istek: Gorev1Istek):
     """Yalnızca Görev 1 ajanını çalıştırır ve sonucu döndürür."""
     try:
         sonuc = calistir_gorev1(istek.ham_metin)
-        return {"gorev1_ciktisi": sonuc.model_dump(mode="json")}
+        gorev1_ciktisi = sonuc.model_dump(mode="json")
+        return {
+            "gorev1_ciktisi": gorev1_ciktisi,
+            "ham_json": json.dumps(
+                {"gorev1": gorev1_ciktisi},
+                ensure_ascii=False,
+                indent=2,
+            ),
+        }
     except Exception as exc:
         import traceback
         print(f"HATA DETAYI:\n{traceback.format_exc()}")
@@ -78,7 +108,7 @@ def evrak_isle(istek: EvrakIsleIstek):
             "ek_bilgi": istek.ek_bilgi
         }
         baslangic_durumu = {k: v for k, v in baslangic_durumu.items() if v is not None}
-        sonuc_state = ajan_uygulamasi.invoke(baslangic_durumu)
+        sonuc_state = ajan_uygulamasi.invoke(cast(Any, baslangic_durumu))
         return sonuc_state
     except Exception as exc:
         import traceback

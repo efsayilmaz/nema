@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import patch
 
 from gorev1 import calistir_gorev1
+from gorev1.agent import _summary_breaks_rule
 
 
 class DummyResponse:
@@ -19,12 +20,10 @@ class DummyCompletions:
         model,
         messages,
         temperature,
-        max_completion_tokens,
-        extra_body,
     ):
         self.calls.append({"model": model, "messages": messages})
         return type("DummyCompletion", (), {"choices": [type(
-            "DummyChoice", (), {"message": type(
+            "DummyChoice", (), {"finish_reason": "stop", "message": type(
                 "DummyMessage", (), {"content": json.dumps({
             "evrak_turu": "Şikayet / İhbar",
             "konu": "Çocuk parkı güvenliği",
@@ -67,9 +66,31 @@ CASELER = [
 
 
 class Gorev1BenchmarkTest(unittest.TestCase):
+    def test_summary_and_topic_reject_header_and_copy(self):
+        payload = {
+            "konu": "İLGİLİ BELEDİYE BAŞKANLIĞINA Tarih: 23.08.2026",
+            "kisa_ozet": "İLGİLİ BELEDİYE BAŞKANLIĞINA Tarih: 23.08.2026",
+            "evrak_tarihi": "23.08.2026",
+            "varliklar": {"kurumlar": ["Belediye"], "tarihler": ["23.08.2026"]},
+        }
+        self.assertTrue(_summary_breaks_rule(payload))
+
+    def test_summary_and_topic_reject_sender_identity(self):
+        payload = {
+            "konu": "Ayşe Yılmaz tarafından yapılan başvurunun değerlendirilmesi",
+            "kisa_ozet": "Ayşe Yılmaz'ın başvurusu incelenerek işlem yapılması istenmektedir.",
+            "gonderen": {
+                "ad_soyad_veya_unvan": "Ayşe Yılmaz",
+                "iletisim_bilgisi": "ayse@example.com",
+            },
+            "varliklar": {"kurumlar": [], "tarihler": []},
+        }
+        self.assertTrue(_summary_breaks_rule(payload))
+
     def test_case_coverage_and_schema(self):
-        with patch("gorev1.agent.OpenAI") as mock_client, patch("gorev1.agent._resolve_api_key", return_value="dummy_key"):
+        with patch("gorev1.agent.get_evren_client") as mock_client, patch("gorev1.agent.get_rag_sistemi") as mock_rag:
             mock_client.return_value.chat.completions = DummyCompletions()
+            mock_rag.return_value.mevzuat_sorgula.return_value = []
             for case in CASELER:
                 with self.subTest(case=case["ad"]):
                     sonuc = calistir_gorev1(case["metin"])
@@ -85,8 +106,9 @@ class Gorev1BenchmarkTest(unittest.TestCase):
                     self.assertIn(data["aciliyet_durumu"], {"Normal", "İvedi", "Çok İvedi"})
 
     def test_realistic_risk_detection(self):
-        with patch("gorev1.agent.OpenAI") as mock_client, patch("gorev1.agent._resolve_api_key", return_value="dummy_key"):
+        with patch("gorev1.agent.get_evren_client") as mock_client, patch("gorev1.agent.get_rag_sistemi") as mock_rag:
             mock_client.return_value.chat.completions = DummyCompletions()
+            mock_rag.return_value.mevzuat_sorgula.return_value = []
             metin = "Çocuk parkında elektrik telleriyle temas eden dallar hayatı tehdit ediyor."
             sonuc = calistir_gorev1(metin)
             self.assertIn(sonuc.aciliyet_durumu, {"İvedi", "Çok İvedi"})

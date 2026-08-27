@@ -183,8 +183,8 @@ if secim != "— Seçiniz —":
     st.session_state.islenen_dosya = None
 
 yuklenen = st.file_uploader(
-    "Veya bir dosya yükleyin (.txt, .pdf, .png, .jpg, .jpeg, .docx)",
-    type=["txt", "pdf", "png", "jpg", "jpeg", "docx"],
+    "Veya bir dosya yükleyin (.txt, .pdf, .docx)",
+    type=["txt", "pdf", "docx"],
     help="Yüklenen dosyalar OCR ve metin çıkarma modülüyle analiz edilip metin kutusuna aktarılır.",
 )
 
