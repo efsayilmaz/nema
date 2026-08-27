@@ -294,28 +294,31 @@ def _sezgisel_gorev2(analiz_sonucu, ek_bilgi):
 # --------------------------------------------------------------------------
 
 def _map_gorev1_response(data):
-    gonderen = data.get("gonderen", {}) or {}
-    varliklar = data.get("varliklar", {}) or {}
+    raw_json = data.get("ham_json")
+    gorev1_data = data.get("gorev1_ciktisi", data)
+    gonderen = gorev1_data.get("gonderen", {}) or {}
+    varliklar = gorev1_data.get("varliklar", {}) or {}
     return {
-        "evrak_turu": data.get("evrak_turu", "Bilinmiyor"),
-        "konu": data.get("konu", ""),
-        "evrak_tarihi": data.get("evrak_tarihi"),
-        "sayi_veya_kayit_no": data.get("sayi_veya_kayit_no"),
+        "evrak_turu": gorev1_data.get("evrak_turu", "Bilinmiyor"),
+        "konu": gorev1_data.get("konu", ""),
+        "evrak_tarihi": gorev1_data.get("evrak_tarihi"),
+        "sayi_veya_kayit_no": gorev1_data.get("sayi_veya_kayit_no"),
         "gonderen": {
             "gonderen_tipi": gonderen.get("gonderen_tipi", "Bilinmiyor"),
             "ad_soyad_veya_unvan": gonderen.get("ad_soyad_veya_unvan"),
             "kimlik_veya_vergi_no": gonderen.get("kimlik_veya_vergi_no"),
             "iletisim_bilgisi": gonderen.get("iletisim_bilgisi"),
         },
-        "kisa_ozet": data.get("kisa_ozet", ""),
+        "kisa_ozet": gorev1_data.get("kisa_ozet", ""),
         "varliklar": {
             "kurumlar": varliklar.get("kurumlar", []),
             "lokasyonlar": varliklar.get("lokasyonlar", []),
             "tarihler": varliklar.get("tarihler", []),
         },
-        "ilgili_mevzuat_onerisi": data.get("ilgili_mevzuat_onerisi", []),
-        "eksik_bilgiler": data.get("eksik_bilgiler", []),
-        "aciliyet_durumu": data.get("aciliyet_durumu", "Normal"),
+        "ilgili_mevzuat_onerisi": gorev1_data.get("ilgili_mevzuat_onerisi", []),
+        "eksik_bilgiler": gorev1_data.get("eksik_bilgiler", []),
+        "aciliyet_durumu": gorev1_data.get("aciliyet_durumu", "Normal"),
+        "ham_json": raw_json,
     }
 
 
@@ -379,7 +382,7 @@ def gorev1_analiz(evrak_metni, base_url=None, demo_mode=True, log=None):
                            json={"ham_metin": evrak_metni}, timeout=REQUEST_TIMEOUT_SN)
         r.raise_for_status()
         state_response = r.json()
-        sonuc = _map_gorev1_response(state_response.get("gorev1_ciktisi", {}))
+        sonuc = _map_gorev1_response(state_response)
         _log_ekle(log, "Evrak Analiz Ajanı", evrak_metni, sonuc["evrak_turu"], time.time() - t0, "backend")
         return sonuc, log, None
     except Exception as exc:

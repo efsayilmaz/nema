@@ -142,8 +142,8 @@ st.markdown(
 )
 
 defaults = {
-    "backend_url": "",
-    "demo_mode": True,
+    "backend_url": "http://127.0.0.1:8001",
+    "demo_mode": False,
     "evrak_metni": "",
     "gorev1_sonuc": None,
     "gorev2_sonuc": None,
