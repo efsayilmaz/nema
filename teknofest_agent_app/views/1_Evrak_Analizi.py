@@ -165,6 +165,30 @@ if st.session_state.gorev1_sonuc:
         else:
             st.markdown("- Mevzuat tespit edilemedi")
 
+    st.markdown("**İşleme Devam Edilebilirlik Durumu**")
+    devam_durumu = s.get("isleme_devam_edilebilirlik_durumu", {}) or {}
+    zorunlu_eksikler = devam_durumu.get("zorunlu_eksikler", [])
+    zorunlu_olmayan_eksikler = devam_durumu.get("zorunlu_olmayan_eksikler", [])
+    with st.container(border=True):
+        if zorunlu_eksikler:
+            st.markdown("⛔ **İşleme devam edebilmem için şu bilgiler zorunludur:**")
+            for eksik in zorunlu_eksikler:
+                st.markdown(
+                    f"- {eksik.get('bilgi', 'Belirtilmemiş')} — "
+                    f"{eksik.get('mevzuat_maddesi', 'İlgili madde belirtilmemiş')} "
+                    f"gereği {eksik.get('sonuc', 'işlem duraklar.')}"
+                )
+        if zorunlu_olmayan_eksikler:
+            st.markdown("✅ **Şu bilgiler eksik ancak işleme devam edilebilir:**")
+            for eksik in zorunlu_olmayan_eksikler:
+                st.markdown(
+                    f"- {eksik.get('bilgi', 'Belirtilmemiş')} — "
+                    f"{eksik.get('mevzuat_maddesi', 'İlgili madde belirtilmemiş')} "
+                    f"gereği {eksik.get('sonuc', 'sonradan tamamlanabilir; işleme devam edilebilir.')}"
+                )
+        if not zorunlu_eksikler and not zorunlu_olmayan_eksikler:
+            st.markdown("✅ Eksik bilgi bulunmadığından işleme devam edilebilir.")
+
     with st.expander("Ham JSON Çıktı (Backend Kontrolü)"):
         st.json(s)
 

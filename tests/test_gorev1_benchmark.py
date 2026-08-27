@@ -52,7 +52,7 @@ class DummyCompletions:
             },
             "ilgili_mevzuat_onerisi": ["İçişleri Bakanlığı mevzuatı"],
             "eksik_bilgiler": [],
-            "aciliyet_durumu": "İvedi",
+            "aciliyet_durumu": "Çok İvedi",
                 }, ensure_ascii=False)}
             )}
         )]})()
@@ -151,6 +151,11 @@ class Gorev1BenchmarkTest(unittest.TestCase):
                     self.assertIn("evrak_ozeti", data)
                     self.assertIn("onemli_bilgi_unsurlari", data)
                     self.assertIn("yasal_yanit_suresi", data)
+                    self.assertIn("isleme_devam_edilebilirlik_durumu", data)
+                    self.assertEqual(
+                        data["isleme_devam_edilebilirlik_durumu"],
+                        {"zorunlu_eksikler": [], "zorunlu_olmayan_eksikler": []},
+                    )
                     self.assertIn("varliklar", data)
                     self.assertIn("aciliyet_durumu", data)
                     self.assertIn(data["aciliyet_durumu"], {"Normal", "İvedi", "Çok İvedi"})

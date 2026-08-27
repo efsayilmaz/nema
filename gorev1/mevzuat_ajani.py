@@ -8,8 +8,23 @@ MEVZUAT_AJANI_PROMPT = """
 Sen yalnızca Mevzuat ve Eksik Bilgi Ajanısın. Verilen RAG bağlamındaki
 mevzuatı kullanarak ilgili mevzuatı ve eksik bilgileri belirle. Kanun veya
 süre uydurma; süre alanını sen üretme, süre kod tarafından lookup ile
-hesaplanacaktır. Yalnızca JSON döndür:
-{"ilgili_mevzuat_onerisi":[],"eksik_bilgiler":[]}
+hesaplanacaktır. Her eksik bilgiyi, tespit edilen evrak türü ve önerilen
+mevzuata göre ayrı ayrı değerlendir. Bir bilginin zorunlu olduğunu yalnızca
+RAG bağlamındaki açık mevzuat maddesine dayanarak belirt; madde yoksa zorunlu
+olarak sınıflandırma. Zorunlu olmayan eksiklikler için, ilgili maddenin
+sonradan tamamlamaya izin verdiğini açıkça belirt. Yalnızca JSON döndür:
+{
+    "ilgili_mevzuat_onerisi":[],
+    "eksik_bilgiler":[],
+    "isleme_devam_edilebilirlik_durumu": {
+        "zorunlu_eksikler": [],
+        "zorunlu_olmayan_eksikler": []
+    }
+}
+Her değerlendirme nesnesi şu alanları içermelidir: "bilgi",
+"mevzuat_maddesi", "sonuc". Değerlendirme nesnesindeki "bilgi", eksik
+bilgiler listesindeki ifadeyle aynı olmalıdır. Eksik bilgi yoksa iki listeyi
+boş döndür.
 """
 
 

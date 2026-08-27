@@ -269,6 +269,9 @@ def calistir_gorev1(
             "6502 sayılı Tüketicinin Korunması Hakkında Kanun (ayıplı mal/hizmet, m.8-11; hakem heyeti m.68-70)"
         ]
     merged["eksik_bilgiler"] = mevzuat.get("eksik_bilgiler", [])
+    merged["isleme_devam_edilebilirlik_durumu"] = mevzuat.get(
+        "isleme_devam_edilebilirlik_durumu"
+    ) or {"zorunlu_eksikler": [], "zorunlu_olmayan_eksikler": []}
     merged["yasal_yanit_suresi"] = lookup_yasal_yanit_suresi(
         merged.get("evrak_turu", ""),
         merged["ilgili_mevzuat_onerisi"],

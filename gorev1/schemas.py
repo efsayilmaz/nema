@@ -24,6 +24,17 @@ class VarliklarSemasi(BaseModel):
     tarihler: List[str] = Field(default_factory=list)
 
 
+class EksikBilgiDegerlendirmesi(BaseModel):
+    bilgi: str
+    mevzuat_maddesi: str
+    sonuc: str
+
+
+class IslemeDevamEdilebilirlikSemasi(BaseModel):
+    zorunlu_eksikler: List[EksikBilgiDegerlendirmesi] = Field(default_factory=list)
+    zorunlu_olmayan_eksikler: List[EksikBilgiDegerlendirmesi] = Field(default_factory=list)
+
+
 class Gorev1CiktiSemasi(BaseModel):
     evrak_turu: str
     evrak_ozeti: str = Field(
@@ -46,6 +57,9 @@ class Gorev1CiktiSemasi(BaseModel):
     )
     ilgili_mevzuat_onerisi: List[str] = Field(default_factory=list)
     eksik_bilgiler: List[str] = Field(default_factory=list)
+    isleme_devam_edilebilirlik_durumu: IslemeDevamEdilebilirlikSemasi = Field(
+        default_factory=IslemeDevamEdilebilirlikSemasi
+    )
     yasal_yanit_suresi: Optional[str] = Field(
         default=None,
         description="Lookup tablosundan deterministik olarak bulunan yasal yanıt süresi."

@@ -34,6 +34,10 @@ GÖREV 1 ÇIKTI ŞEMASI (backend'den beklenen JSON)
   },
   "ilgili_mevzuat_onerisi": ["string", ...],
   "eksik_bilgiler": ["string", ...],
+    "isleme_devam_edilebilirlik_durumu": {
+        "zorunlu_eksikler": [{"bilgi": "string", "mevzuat_maddesi": "string", "sonuc": "string"}],
+        "zorunlu_olmayan_eksikler": [{"bilgi": "string", "mevzuat_maddesi": "string", "sonuc": "string"}]
+    },
   "aciliyet_durumu": "Normal | İvedi | Çok İvedi"
 }
 
@@ -319,6 +323,10 @@ def _map_gorev1_response(data):
         },
         "ilgili_mevzuat_onerisi": gorev1_data.get("ilgili_mevzuat_onerisi", []),
         "eksik_bilgiler": gorev1_data.get("eksik_bilgiler", []),
+        "isleme_devam_edilebilirlik_durumu": gorev1_data.get(
+            "isleme_devam_edilebilirlik_durumu",
+            {"zorunlu_eksikler": [], "zorunlu_olmayan_eksikler": []},
+        ),
         "aciliyet_durumu": gorev1_data.get("aciliyet_durumu", "Normal"),
         "ham_json": raw_json,
     }
