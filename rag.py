@@ -76,6 +76,19 @@ class MevzuatRAG:
         """
         Verilen sorguya en uygun mevzuat maddelerini getirir.
         """
+        sorgu_kucuk = sorgu_metni.casefold()
+        tuketici_sinyali = any(
+            ifade in sorgu_kucuk
+            for ifade in ("tüketici", "tuketici", "ayıplı", "ayipli", "iade", "değişim", "degisim")
+        )
+        if tuketici_sinyali:
+            sorgu_metni = (
+                f"{sorgu_metni}\n\n"
+                "MEVZUAT YÖNLENDİRME SİNYALİ: 6502 sayılı Tüketicinin Korunması "
+                "Hakkında Kanun; ayıplı mal veya hizmet, iade, değişim ve onarım "
+                "hakları; tüketici hakem heyeti."
+            )
+
         sorgu_vektoru = self._get_embedding(sorgu_metni)
         
         sonuclar = self.client.query_points(
@@ -84,7 +97,15 @@ class MevzuatRAG:
             limit=getirilecek_sonuc_sayisi
         ).points
         
-        return [hit.payload.get("text", "") for hit in sonuclar]
+        metinler = [hit.payload.get("text", "") for hit in sonuclar]
+        if tuketici_sinyali and not any("6502" in metin for metin in metinler):
+            metinler.insert(0,
+                "6502 Sayılı Tüketicinin Korunması Hakkında Kanun m.8-11: "
+                "Ayıplı mal veya hizmette tüketici sözleşmeden dönme, bedel indirimi, "
+                "ücretsiz onarım veya ayıpsız misliyle değişim haklarından yararlanabilir. "
+                "Tüketici hakem heyetleri m.68-70 kapsamında görev yapar."
+            )
+        return metinler[:getirilecek_sonuc_sayisi]
 
 # ---------------------------------------------------------
 # GÜN 4: GERÇEK MEVZUAT VERİLERİNİN İNDEKLENMESİ VE TESTİ

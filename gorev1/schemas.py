@@ -26,6 +26,10 @@ class VarliklarSemasi(BaseModel):
 
 class Gorev1CiktiSemasi(BaseModel):
     evrak_turu: str
+    evrak_ozeti: str = Field(
+        default="",
+        description="Özetleme ajanının evrakın niyetini ve gerekçesini anlatan kısa özeti."
+    )
     konu: str = Field(
         description="Evrakın niyetini ve gerekçesini kendi cümlesiyle anlatan yeni konu. Evrak kimliği, kurum, alıcı, gönderen, tarih, sayı, adres veya 'Konu:' içermez."
     )
@@ -36,6 +40,14 @@ class Gorev1CiktiSemasi(BaseModel):
         description="Evrakın niyetini ve gerekçesini 1-3 özgün cümleyle anlatır. Evrak kimliği, kurum, alıcı, gönderen, tarih, sayı, adres veya belge başlığını tekrarlamaz."
     )
     varliklar: VarliklarSemasi
+    onemli_bilgi_unsurlari: List[str] = Field(
+        default_factory=list,
+        description="Sınıflandırma ve bilgi çıkarım ajanının belirlediği önemli unsurlar."
+    )
     ilgili_mevzuat_onerisi: List[str] = Field(default_factory=list)
     eksik_bilgiler: List[str] = Field(default_factory=list)
+    yasal_yanit_suresi: Optional[str] = Field(
+        default=None,
+        description="Lookup tablosundan deterministik olarak bulunan yasal yanıt süresi."
+    )
     aciliyet_durumu: AciliyetDurumu

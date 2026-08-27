@@ -4,11 +4,14 @@ import re
 import warnings
 from difflib import SequenceMatcher
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
-from evren_client import get_evren_client, validate_response_content
+from evren_client import get_evren_client
 from pydantic import ValidationError
 
+from gorev1.mevzuat_ajani import calistir_mevzuat_ajani
+from gorev1.ozetleme_ajani import calistir_ozetleme_ajani
+from gorev1.siniflandirma_ajani import calistir_siniflandirma_ajani
 from gorev1.schemas import Gorev1CiktiSemasi
 from rag import MevzuatRAG
 
@@ -25,29 +28,60 @@ def get_rag_sistemi() -> MevzuatRAG:
     return _RAG_SISTEMI
 
 
-GOREV1_SYSTEM_INSTRUCTION = """
-Türkçe kamu evrakını analiz et. Yalnızca geçerli JSON üret; açıklama, markdown
-ve düşünme metni yazma. Bilgi yoksa null veya [] kullan, asla uydurma.
-Evrak türü, kısa resmi konu ve 1-3 cümlelik özet çıkar. KONU ve KISA ÖZET
-alanlarını üretirken tek ilke şudur: Bu iki alan yalnızca evrakın NİYETİNİ
-(ne istendiğini veya bildirildiğini) ve GEREKÇESİNİ (neden istendiğini) kendi
-cümlelerinle anlatır. Evrakın kimliğine ait hiçbir unsur bu alanlara giremez:
-kime gönderildiği, yazılma tarihi, sayı/kayıt numarası, gönderenin adı/unvanı,
-adresi veya iletişim bilgileri. Bunlar ayrı alanlarda tutulur.
-Konu ve özet, evrakın biçimini ya da metindeki başlıkların sırasını kopyalamaz.
-Kendine şu kontrolü uygula: "Bu cümleyi, evrakın metnini görmeden yalnızca
-olayı bilen biri kurabilir miydi?" Hayırsa cümleyi sıfırdan yeniden yaz.
-KONU VE KISA ÖZET — KESİN YASAKLAR: kurum/makam adı, alıcı, gönderen,
-"Tarih:" veya "Konu:" ifadesi, herhangi bir tarih/sayı formatı, adres,
-iletişim bilgisi ya da başlık satırının kopyası içeremez. Özet, başlık bölümü
-görülmeden talebi ve gerekçeyi anlatan özgün cümlelerden oluşmalıdır. JSON'u
-döndürmeden önce bu kurala göre kontrol et.
-Tarih ve sayı/kayıt numarasını yalnızca açıkça yazılmışsa doldur. Göndereni ve
-iletişim bilgilerini çıkar. Kurum, lokasyon ve tarihleri listele. Mevzuat ve
-eksik belgeleri listele.
-Aciliyet yalnızca Normal, İvedi veya Çok İvedi olsun; can/çocuk güvenliği,
-elektrik, yangın, afet, haciz veya yakın süreli risk varsa İvedi/Çok İvedi seç.
-"""
+# Anahtarlar evrak türü ve mevzuat numarasıdır; yeni satırlar buraya eklenebilir.
+YASAL_YANIT_SURESI_LOOKUP = {
+    ("bilgi_edinme_basvurusu", "4982"): ("15 iş günü", "4982 sayılı Kanun m.11"),
+    ("bilgi_edinme_basvurusu_aktarim", "4982"): ("30 iş günü", "4982 sayılı Kanun m.11"),
+    ("dilekçe", "3071"): ("30 gün", "3071 sayılı Kanun m.7"),
+    ("idari_basvuru", "3071"): ("30 gün", "3071 sayılı Kanun m.7"),
+    ("tüketici_şikayeti", "6502"): (
+        "Kanunda azami süre belirtilmemiştir",
+        "6502 sayılı Kanun m.68-70",
+    ),
+}
+
+
+def _normalize_document_type(value: str) -> str:
+    value = value.casefold().replace("î", "i").replace("ı", "i")
+    value = re.sub(r"[^a-z0-9çğıöşü ]", " ", value)
+    value = re.sub(r"\s+", " ", value).strip()
+    if "bilgi edinme" in value:
+        return "bilgi_edinme_basvurusu"
+    if any(term in value for term in ("tüketici", "tuketici", "ayıplı", "ayipli")):
+        return "tüketici_şikayeti"
+    if "idari başvuru" in value or "idari basvuru" in value:
+        return "idari_basvuru"
+    if "dilek" in value:
+        return "dilekçe"
+    return value.replace(" ", "_")
+
+
+def lookup_yasal_yanit_suresi(evrak_turu: str, mevzuat: list[str], source_text: str = "") -> Optional[str]:
+    """Yasal süreyi yalnızca statik tablo eşleşmesine göre döndürür."""
+    tur = _normalize_document_type(evrak_turu)
+    source = source_text.casefold()
+    for madde in mevzuat:
+        match = re.search(r"\b(3071|4982|6502)\b", str(madde))
+        if not match:
+            continue
+        kanun_no = match.group(1)
+        if tur == "bilgi_edinme_basvurusu" and any(
+            ifade in source for ifade in ("başka kurum", "baska kurum", "kurum arşivinde yok", "kurum arsivinde yok")
+        ):
+            tur = "bilgi_edinme_basvurusu_aktarim"
+        kayit = YASAL_YANIT_SURESI_LOOKUP.get((tur, kanun_no))
+        if kayit:
+            sure, referans = kayit
+            return f"{sure} ({referans})"
+    return None
+
+
+def _tuketici_evraki_mi(evrak_turu: str, source_text: str) -> bool:
+    metin = f"{evrak_turu} {source_text}".casefold()
+    return any(
+        ifade in metin
+        for ifade in ("tüketici", "tuketici", "ayıplı", "ayipli", "iade", "değişim", "degisim")
+    )
 
 
 def _normalize_input(evrak_metni: Union[str, dict]) -> str:
@@ -85,8 +119,12 @@ def _remove_thinking(raw_text: str) -> str:
 def _normalize_payload(payload: dict) -> dict:
     if "sayi_veya_kayit_no" not in payload:
         payload["sayi_veya_kayit_no"] = payload.pop("evrak_sayi_kayit", None)
+    if "evrak_ozeti" not in payload:
+        payload["evrak_ozeti"] = payload.get("kisa_ozet") or payload.pop("ozet", "")
     if "kisa_ozet" not in payload:
-        payload["kisa_ozet"] = payload.pop("ozet", "")
+        payload["kisa_ozet"] = payload.get("evrak_ozeti", "")
+    payload.setdefault("onemli_bilgi_unsurlari", [])
+    payload.setdefault("yasal_yanit_suresi", None)
 
     if "gonderen" not in payload:
         bilgiler = payload.pop("gonderen_bilgileri", {}) or {}
@@ -172,15 +210,12 @@ def _parse_gorev1_response(raw_text: str, source_text: str = "") -> Gorev1CiktiS
         raise ValueError("Model boş JSON döndürdü.")
 
     try:
-        result = Gorev1CiktiSemasi.model_validate_json(raw_text)
-    except ValidationError:
-        try:
-            result = Gorev1CiktiSemasi.model_validate(_normalize_payload(json.loads(raw_text)))
-        except Exception as exc:  # pragma: no cover - hata detayını net göstersin
-            raise ValueError(
-                "Model çıktısı beklenen şemaya uymuyor. "
-                f"Ham çıktı: {raw_text[:500]}"
-            ) from exc
+        result = Gorev1CiktiSemasi.model_validate(_normalize_payload(json.loads(raw_text)))
+    except (ValidationError, json.JSONDecodeError, TypeError) as exc:
+        raise ValueError(
+            "Model çıktısı beklenen şemaya uymuyor. "
+            f"Ham çıktı: {raw_text[:500]}"
+        ) from exc
 
     if _summary_breaks_rule(result.model_dump(), source_text):
         raise ValueError("Model kisa_ozet alanında başlık bilgilerini tekrarladı.")
@@ -192,7 +227,7 @@ def calistir_gorev1(
     model_name: Optional[str] = None,
     api_key: Optional[str] = None,
 ) -> Gorev1CiktiSemasi:
-    """Tek bir ham evrak metnini analiz ederek Görev 1 çıktısı üretir."""
+    """Üç uzman ajanı çalıştırıp çıktıları tek Görev 1 nesnesinde birleştirir."""
     selected_model = model_name or os.getenv("EVREN_MODEL", "llm-fast")
 
     client = get_evren_client()
@@ -201,53 +236,38 @@ def calistir_gorev1(
     rag = get_rag_sistemi()
     mevzuat_baglami = rag.mevzuat_sorgula(input_text, getirilecek_sonuc_sayisi=2)
 
-    prompt = f"""
-Aşağıdaki tek ham evrakı analiz et ve Görev 1 çıktısını oluştur.
+    ozet = calistir_ozetleme_ajani(client, selected_model, input_text)
+    siniflandirma = calistir_siniflandirma_ajani(client, selected_model, input_text)
+    mevzuat = calistir_mevzuat_ajani(
+        client, selected_model, input_text, mevzuat_baglami
+    )
 
-HAM EVRAK:
---------------------
-{input_text}
---------------------
-
-SİSTEMDEN GELEN İLGİLİ MEVZUAT BAĞLAMI:
-{mevzuat_baglami}
-Lütfen Görev 1 analizini yaparken, uydurma kanunlar yazmak yerine SADECE yukarıda verilen mevzuat bağlamını kullan.
-
-Yalnızca aşağıdaki anahtarları kullanarak tek bir JSON nesnesi döndür:
-{{"evrak_turu":"...","konu":"...","evrak_tarihi":null,
-"sayi_veya_kayit_no":null,"gonderen":{{"gonderen_tipi":"...",
-"ad_soyad_veya_unvan":null,"kimlik_veya_vergi_no":null,
-"iletisim_bilgisi":null}},"kisa_ozet":"...",
-"varliklar":{{"kurumlar":[],"lokasyonlar":[],"tarihler":[]}},
-"ilgili_mevzuat_onerisi":[],"eksik_bilgiler":[],"aciliyet_durumu":"Normal"}}
-"""
-
-    messages: list[Any] = [
-        {"role": "system", "content": GOREV1_SYSTEM_INSTRUCTION},
-        {"role": "user", "content": prompt},
-    ]
-    last_error = None
-    for attempt in range(2):
-        if attempt:
-            messages.append({
-                "role": "user",
-                "content": (
-                    "Önceki konu veya kisa_ozet kurala aykırıydı. Her iki alanı da "
-                    "sıfırdan yaz: yalnızca evrakın niyetini ve gerekçesini kendi "
-                    "cümlelerinle anlat. Alıcı, gönderen, ad/unvan, adres, iletişim, "
-                    "kurum, tarih, sayı/kayıt, başlık ve 'Tarih:'/'Konu:' ifadelerini "
-                    "kesinlikle kullanma."
-                ),
-            })
-        response = client.chat.completions.create(
-            model=selected_model,
-            messages=messages,
-            temperature=0.1,
+    merged = dict(siniflandirma)
+    merged["konu"] = ozet.get("konu") or merged.get("konu", "")
+    merged["evrak_ozeti"] = ozet.get("kisa_ozet") or ozet.get("evrak_ozeti") or ozet.get("ozet") or ""
+    merged["kisa_ozet"] = merged["evrak_ozeti"]
+    merged["ilgili_mevzuat_onerisi"] = mevzuat.get("ilgili_mevzuat_onerisi", [])
+    if not merged["ilgili_mevzuat_onerisi"] and _tuketici_evraki_mi(
+        merged.get("evrak_turu", ""), input_text
+    ):
+        merged["ilgili_mevzuat_onerisi"] = [
+            "6502 sayılı Tüketicinin Korunması Hakkında Kanun (ayıplı mal/hizmet, m.8-11; hakem heyeti m.68-70)"
+        ]
+    merged["eksik_bilgiler"] = mevzuat.get("eksik_bilgiler", [])
+    merged["yasal_yanit_suresi"] = lookup_yasal_yanit_suresi(
+        merged.get("evrak_turu", ""),
+        merged["ilgili_mevzuat_onerisi"],
+        input_text,
+    )
+    try:
+        return _parse_gorev1_response(json.dumps(merged, ensure_ascii=False), input_text)
+    except ValueError as exc:
+        if "kisa_ozet" not in str(exc):
+            raise
+        duzeltilmis_ozet = calistir_ozetleme_ajani(
+            client, selected_model, input_text, duzeltme_istemi=True
         )
-        try:
-            return _parse_gorev1_response(validate_response_content(response), input_text)
-        except ValueError as exc:
-            last_error = exc
-    if last_error is not None:
-        raise last_error
-    raise RuntimeError("Görev 1 yanıt üretmedi.")
+        merged["konu"] = duzeltilmis_ozet.get("konu", merged.get("konu", ""))
+        merged["evrak_ozeti"] = duzeltilmis_ozet.get("kisa_ozet", duzeltilmis_ozet.get("evrak_ozeti", ""))
+        merged["kisa_ozet"] = merged["evrak_ozeti"]
+        return _parse_gorev1_response(json.dumps(merged, ensure_ascii=False), input_text)

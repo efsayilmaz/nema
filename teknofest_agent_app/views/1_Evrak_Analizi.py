@@ -129,7 +129,11 @@ if st.session_state.gorev1_sonuc:
 
     st.markdown(f"**Konu:** {s.get('konu', '—')}")
     st.markdown("**Kısa Özet**")
-    st.info(s.get("kisa_ozet", "—"))
+    if s.get("ozet_basarili", True):
+        st.info(s.get("kisa_ozet", "—"))
+    else:
+        st.warning("Özet oluşturulamadı; ham metin gösteriliyor.")
+        st.text_area("Ham Evrak Metni", value=st.session_state.evrak_metni, height=220, disabled=True)
 
     c1, c2 = st.columns(2)
     with c1:
@@ -154,14 +158,18 @@ if st.session_state.gorev1_sonuc:
         st.markdown(f"- **Tarihler:** {', '.join(varliklar.get('tarihler', [])) or '—'}")
 
         st.markdown("**İlgili Mevzuat Önerisi**")
-        for m in s.get("ilgili_mevzuat_onerisi", []):
-            st.markdown(f"- {m}")
+        mevzuat = s.get("ilgili_mevzuat_onerisi", [])
+        if mevzuat:
+            for m in mevzuat:
+                st.markdown(f"- {m}")
+        else:
+            st.markdown("- Mevzuat tespit edilemedi")
 
     with st.expander("Ham JSON Çıktı (Backend Kontrolü)"):
         st.json(s)
 
     st.divider()
     st.page_link(
-        "views/2_Taslak_Olusturma.py",
+        "pages/2_Gorev_2_Taslak_Yonlendirme.py",
         label="→  Yazı Taslağı Oluştur",
     )

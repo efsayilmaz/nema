@@ -29,7 +29,7 @@ with st.container():
             unsafe_allow_html=True,
         )
     with c_btn:
-        st.page_link("views/1_Evrak_Analizi.py", label="Analize Başla →")
+        st.page_link("pages/1_Gorev_1_Siniflandirma.py", label="Analize Başla →")
 
 st.divider()
 
@@ -47,7 +47,7 @@ with st.container():
             unsafe_allow_html=True,
         )
     with c_btn:
-        st.page_link("views/2_Taslak_Olusturma.py", label="Taslak Oluştur →")
+        st.page_link("pages/2_Gorev_2_Taslak_Yonlendirme.py", label="Taslak Oluştur →")
 
 st.divider()
 
@@ -65,7 +65,7 @@ with st.container():
             unsafe_allow_html=True,
         )
     with c_btn:
-        st.page_link("views/3_Sistem_Demosu.py", label="Demoyu Başlat →")
+        st.page_link("pages/3_Demo_Uctan_Uca.py", label="Demoyu Başlat →")
 
 st.divider()
 

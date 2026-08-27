@@ -31,7 +31,7 @@ st.markdown(
 
 if not st.session_state.gorev1_sonuc:
     st.warning("Önce Evrak Analizi modülünde bir evrak analiz etmelisiniz.")
-    st.page_link("views/1_Evrak_Analizi.py", label="← Evrak Analizine Git")
+    st.page_link("pages/1_Gorev_1_Siniflandirma.py", label="← Evrak Analizine Git")
     st.stop()
 
 analiz = st.session_state.gorev1_sonuc

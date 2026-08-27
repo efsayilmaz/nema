@@ -188,7 +188,7 @@ def _sezgisel_gorev1(evrak_metni):
         aciliyet = "Normal"
 
     cumleler = [c.strip() for c in re.split(r"[.\n]", metin) if len(c.strip()) > 20]
-    kisa_ozet = " ".join(cumleler[:2])[:280] or metin.strip()[:280]
+    kisa_ozet = "Özet oluşturulamadı; ham metin gösteriliyor."
 
     return {
         "evrak_turu": evrak_turu,
@@ -202,6 +202,8 @@ def _sezgisel_gorev1(evrak_metni):
             "iletisim_bilgisi": iletisim,
         },
         "kisa_ozet": kisa_ozet,
+        "evrak_ozeti": kisa_ozet,
+        "ozet_basarili": False,
         "varliklar": {
             "kurumlar": kurumlar,
             "lokasyonlar": lokasyonlar,
@@ -388,7 +390,7 @@ def gorev1_analiz(evrak_metni, base_url=None, demo_mode=True, log=None):
     except Exception as exc:
         sonuc = _sezgisel_gorev1(evrak_metni)
         _log_ekle(log, "Evrak Analiz Ajanı", evrak_metni, sonuc["evrak_turu"], time.time() - t0, "mock (hata sonrası)")
-        return sonuc, log, f"Backend'e ulaşılamadı, örnek veri gösteriliyor. Hata: {exc}"
+        return sonuc, log, f"Özetleme başarısız; ham metin gösteriliyor. Backend hatası: {exc}"
 
 
 def gorev2_taslak(analiz_sonucu, ek_bilgi=None, base_url=None, demo_mode=True, log=None):
