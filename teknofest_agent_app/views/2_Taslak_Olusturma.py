@@ -49,13 +49,13 @@ eksikler = [e for e in analiz.get("eksik_bilgiler", []) if e]
 
 if not taslak_olur:
     st.error(
-        f"⛔ **Mevzuat Uyarısı ({derece}):**\n\n"
+        f"Mevzuat Uyarısı ({derece}):\n\n"
         f"{analiz.get('isleme_devam_gerekcesi', '3071 Sayılı Kanun gereğince kimlik/talep bilgisi olmadan taslak üretilemez.')}\n\n"
         f"Taslağın oluşturulabilmesi için lütfen aşağıdaki alana eksik olan zorunlu bilgileri (Ad-Soyad, Konu vb.) giriniz."
     )
     ek_bilgi = st.text_input("Zorunlu Ek Bilgi / Kimlik Girişi (Gereklidir):", placeholder="Örn: Başvuru Sahibi: Ahmet Yılmaz, T.C.: 12345678901, Konu: ...")
 elif eksikler:
-    st.warning("⚠️ **Tamamlanabilir İdari Eksiklikler:** " + ", ".join(eksikler))
+    st.warning("Tamamlanabilir İdari Eksiklikler: " + ", ".join(eksikler))
     ek_bilgi = st.text_input("Ek Bilgi / Not Girişi (Opsiyonel):", placeholder="Taslağa veya cevaba eklenecek notları yazabilirsiniz...")
 
 buton_devre_disi = (not taslak_olur and not (ek_bilgi and ek_bilgi.strip()))
@@ -136,7 +136,7 @@ if st.session_state.gorev2_sonuc:
     btn_c, info_c = st.columns([1, 2.5], vertical_alignment="center")
     with btn_c:
         st.download_button(
-            "⬇ Taslağı İndir (.txt)",
+            "Taslağı İndir (.txt)",
             tam_metin,
             file_name="resmi_yazi_taslagi.txt",
             use_container_width=True,

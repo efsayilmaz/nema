@@ -139,15 +139,15 @@ if st.session_state.gorev1_sonuc:
     with c1:
         st.markdown("**Gönderen Bilgileri**")
         st.markdown(f"- **Tür:** {gonderen.get('gonderen_tipi') or '—'}")
-        st.markdown(f"- **Ad/Unvan:** {gonderen.get('ad_soyad_veya_unvan') or '⚠️ Belirtilmemiş'}")
-        st.markdown(f"- **Kimlik/Vergi No:** {gonderen.get('kimlik_veya_vergi_no') or '⚠️ Belirtilmemiş'}")
-        st.markdown(f"- **İletişim:** {gonderen.get('iletisim_bilgisi') or '⚠️ Belirtilmemiş'}")
+        st.markdown(f"- **Ad/Unvan:** {gonderen.get('ad_soyad_veya_unvan') or 'Belirtilmemiş'}")
+        st.markdown(f"- **Kimlik/Vergi No:** {gonderen.get('kimlik_veya_vergi_no') or 'Belirtilmemiş'}")
+        st.markdown(f"- **İletişim:** {gonderen.get('iletisim_bilgisi') or 'Belirtilmemiş'}")
 
         st.markdown("**Eksik Bilgiler**")
         eksikler = s.get("eksik_bilgiler", [])
         if eksikler:
             for e in eksikler:
-                st.markdown(f"- ⚠️ {e}")
+                st.markdown(f"- {e}")
         else:
             st.markdown("- Eksik bilgi tespit edilmedi")
 

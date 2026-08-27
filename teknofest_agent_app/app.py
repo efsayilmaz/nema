@@ -132,6 +132,49 @@ st.markdown(
         padding: 12px 16px;
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
     }
+
+    /* Sekmeleri Renkli ve Kurumsal Yanyana Butonlara Dönüştürme */
+    div[data-testid="stTabs"] > div[role="tablist"] {
+        display: flex;
+        gap: 12px;
+        background-color: #f1f5f9;
+        padding: 8px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 24px;
+        margin-top: 10px;
+    }
+    button[data-testid="stTab"] {
+        flex: 1 1 auto;
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        padding: 10px 18px !important;
+        color: #1e293b !important;
+        font-weight: 600 !important;
+        font-size: 0.93rem !important;
+        text-align: center !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    button[data-testid="stTab"]:hover {
+        background-color: #e2edf8 !important;
+        color: #1e3a8a !important;
+        border-color: #93c5fd !important;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(30, 58, 138, 0.08) !important;
+    }
+    button[data-testid="stTab"][aria-selected="true"] {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important;
+        color: #ffffff !important;
+        border-color: #1e3a8a !important;
+        box-shadow: 0 3px 10px rgba(30, 58, 138, 0.28) !important;
+        transform: translateY(-1px);
+    }
+    div[data-testid="stTabs"] [data-baseweb="tab-highlight"],
+    div[data-testid="stTabs"] [data-baseweb="tab-border"] {
+        display: none !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,

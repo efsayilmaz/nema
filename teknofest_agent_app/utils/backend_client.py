@@ -210,7 +210,13 @@ def _sezgisel_gorev1(evrak_metni):
         zorunlu = []
         tamamlanabilir = []
 
-    kisa_ozet = "Özet oluşturulamadı; ham metin gösteriliyor."
+    cumleler = [c.strip() for c in metin.replace("\n", " ").split(".") if len(c.strip()) > 10]
+    if cumleler:
+        kisa_ozet = ". ".join(cumleler[:2]) + "."
+        ozet_basarili = True
+    else:
+        kisa_ozet = metin[:200]
+        ozet_basarili = bool(metin.strip())
 
     return {
         "evrak_turu": evrak_turu,
@@ -225,7 +231,7 @@ def _sezgisel_gorev1(evrak_metni):
         },
         "kisa_ozet": kisa_ozet,
         "evrak_ozeti": kisa_ozet,
-        "ozet_basarili": False,
+        "ozet_basarili": ozet_basarili,
         "varliklar": {
             "kurumlar": kurumlar,
             "lokasyonlar": lokasyonlar,
@@ -354,7 +360,9 @@ def _map_gorev1_response(data):
             "kimlik_veya_vergi_no": gonderen.get("kimlik_veya_vergi_no"),
             "iletisim_bilgisi": gonderen.get("iletisim_bilgisi"),
         },
-        "kisa_ozet": gorev1_data.get("kisa_ozet", ""),
+        "kisa_ozet": gorev1_data.get("kisa_ozet") or gorev1_data.get("evrak_ozeti") or "",
+        "evrak_ozeti": gorev1_data.get("evrak_ozeti") or gorev1_data.get("kisa_ozet") or "",
+        "ozet_basarili": bool(gorev1_data.get("kisa_ozet") or gorev1_data.get("evrak_ozeti")),
         "varliklar": {
             "kurumlar": varliklar.get("kurumlar", []),
             "lokasyonlar": varliklar.get("lokasyonlar", []),
