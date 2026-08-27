@@ -63,7 +63,7 @@ class ResmiYaziTaslagi(BaseModel):
     )
     govde_metni: str = Field(
         ...,
-        description="Resmî yazışma kurallarına uygun, kurumsal üslup taşıyan gövde metni"
+        description="Yazının yalnızca özünü ve gerekçesini içeren içerik metni (başlık, arz/rica, imza gibi şablon kısımlarını EKLEMEYİN)"
     )
     imza_makami: str = Field(
         ...,

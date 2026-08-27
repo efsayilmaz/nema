@@ -4,8 +4,7 @@ import re
 import time
 from typing import Dict, Any, Union, Optional
 
-from dotenv import load_dotenv
-from groq import Groq
+from evren_client import get_evren_client, validate_response_content
 from pydantic import BaseModel
 
 from gorev2.schemas import (
@@ -15,7 +14,6 @@ from gorev2.schemas import (
     AksiyonDurumu
 )
 
-load_dotenv()
 
 
 GOREV2_SYSTEM_INSTRUCTION = """
@@ -35,7 +33,7 @@ Verilen evrak analizini dikkatle inceleyerek aşağıdaki üç temel bileşenden
    - `yazi_turu`: Yalnızca şu 4 değerden biri olmalıdır: "Eksik Bilgi/Belge Talebi", "Üst Yazı", "Cevap Yazısı", "Bilgilendirme Metni".
    - `konu`: Resmî yazının özü ve mevzuata uygun konusu.
    - `ilgi`: Evraka referans veren resmî ilgi tutma cümlesi.
-   - `govde_metni`: Resmî yazışma kurallarına uygun, kurumsal ve ciddi bir dille yazılmış gövde metni.
+   - `govde_metni`: Yazının yalnızca özü, kararı ve gerekçesini anlatan sade içerik metni (Başlık, İlgi, Arz/Rica, İmza GİBİ ŞABLONLARI YAZMA).
    - `imza_makami`: Yazıyı imzalayacak/onaylayacak yetkili makam unvanı.
 
 3. KULLANICI BİLGİLENDİRME (`kullanici_bilgilendirme`):
@@ -63,6 +61,22 @@ def _normalize_input(girdi_verisi: Union[dict, str, BaseModel, Gorev1CiktiSemasi
         return str(girdi_verisi)
 
 
+def _format_resmi_yazi(taslak) -> str:
+    """LLM'den gelen saf içeriği resmî yazı şablonuna oturtur."""
+    return f"""T.C.
+KAMU KURUMU
+{taslak.konu.upper()}
+
+İlgi: {taslak.ilgi}
+
+{taslak.govde_metni}
+
+Gereğini / Bilgilerinize arz/rica ederim.
+
+{taslak.imza_makami}
+"""
+
+
 def calistir_gorev2(
     girdi_verisi: Union[dict, str, BaseModel, Gorev1CiktiSemasi],
     api_key: Optional[str] = None,
@@ -80,7 +94,8 @@ def calistir_gorev2(
     Returns:
         Gorev2CiktiSemasi: Görev 2 standart Pydantic çıktı nesnesi.
     """
-    client = Groq(api_key=api_key or os.getenv("GROQ_API_KEY"))
+    client = get_evren_client()
+    selected_model = model_name or os.getenv("EVREN_MODEL", "llm-fast")
 
     schema_str = json.dumps(Gorev2CiktiSemasi.model_json_schema(), ensure_ascii=False)
 
@@ -103,13 +118,12 @@ Beklenen JSON Şeması:
     for deneme in range(max_deneme):
         try:
             response = client.chat.completions.create(
-                model=model_name,
+                model=selected_model,
                 messages=messages,
-                temperature=0.1,
-                max_tokens=4000
+                temperature=0.1
             )
 
-            raw_text = response.choices[0].message.content.strip()
+            raw_text = validate_response_content(response)
 
             # <think>...</think> düşünce bloklarını temizle
             if "<think>" in raw_text:
@@ -138,11 +152,15 @@ Beklenen JSON Şeması:
 
             # Önce JSON olarak doğrulamayı dene
             try:
-                return Gorev2CiktiSemasi.model_validate_json(raw_text)
+                cikti = Gorev2CiktiSemasi.model_validate_json(raw_text)
             except Exception:
                 # JSON parse edip dict üzerinden doğrula
                 payload = json.loads(raw_text)
-                return Gorev2CiktiSemasi.model_validate(payload)
+                cikti = Gorev2CiktiSemasi.model_validate(payload)
+                
+            # Şablon giydirme işlemi (Template Layer)
+            cikti.resmi_yazi_taslagi.govde_metni = _format_resmi_yazi(cikti.resmi_yazi_taslagi)
+            return cikti
 
         except Exception as e:
             son_hata = e

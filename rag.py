@@ -1,42 +1,90 @@
-import chromadb
-from chromadb.utils import embedding_functions
+import os
+import uuid
+import hashlib
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, PointStruct
+from evren_client import get_evren_client
 
 class MevzuatRAG:
-    def __init__(self, db_yolu="./chroma_db"):
-        # 1. ChromaDB İstemcisini Başlat (Veriler yerel diskte saklanacak)
-        self.client = chromadb.PersistentClient(path=db_yolu)
+    def __init__(self):
+        # 1. EVREN Client'ı başlat (Bu aynı zamanda .env dosyasını yükler)
+        self.evren_client = get_evren_client()
         
-        # 2. Embedding Modelini Belirle (Türkçe performansı yüksek model)
-        self.embedding_fonksiyonu = embedding_functions.SentenceTransformerEmbeddingFunction(
-            model_name="BAAI/bge-m3"
-        )
+        # 2. Qdrant İstemcisini Başlat
+        qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+        qdrant_api_key = os.getenv("QDRANT_API_KEY", "")
         
-        # 3. Koleksiyonu (Tabloyu) Oluştur veya Bağlan
-        self.koleksiyon = self.client.get_or_create_collection(
-            name="mevzuat_bilgi_tabani",
-            embedding_function=self.embedding_fonksiyonu
+        # URL'den portu ayrıştır (eğer belirtilmemişse https için 443, http için 6333 kullan)
+        import urllib.parse
+        parsed_url = urllib.parse.urlparse(qdrant_url)
+        port = parsed_url.port or (443 if parsed_url.scheme == 'https' else 6333)
+        
+        # EVREN URL'ine API Key ile bağlanmak
+        if qdrant_api_key:
+            self.client = QdrantClient(url=qdrant_url, port=port, api_key=qdrant_api_key, timeout=60.0)
+        else:
+            self.client = QdrantClient(url=qdrant_url, port=port, timeout=60.0)
+            
+        self.collection_name = "mevzuat_bilgi_tabani"
+        
+        # 2. Koleksiyonu (Tabloyu) Oluştur veya Bağlan
+        if not self.client.collection_exists(self.collection_name):
+            # Not: İleride embed (2560 boyut) alias'ına geçilirse ayrı bir koleksiyon veya size=2560 gerekecektir.
+            self.client.create_collection(
+                collection_name=self.collection_name,
+                vectors_config=VectorParams(size=1024, distance=Distance.COSINE)
+            )
+
+    def _get_embedding(self, text: str) -> list:
+        # EVREN üzerinden bge-m3-embed ile vektör al
+        response = self.evren_client.embeddings.create(
+            input=[text],
+            model="bge-m3-embed"
         )
+        return response.data[0].embedding
 
     def mevzuat_ekle(self, metinler: list, metin_idleri: list, metin_metadatalari: list):
         """
         Mevzuat maddelerini vektörleştirip veritabanına ekler.
         """
-        self.koleksiyon.add(
-            documents=metinler,
-            ids=metin_idleri,
-            metadatas=metin_metadatalari
+        points = []
+        for metin, m_id, metadata in zip(metinler, metin_idleri, metin_metadatalari):
+            vektor = self._get_embedding(metin)
+            
+            # Qdrant string ID'leri GUID formatında kabul eder, bu yüzden hashleyip UUID yapıyoruz.
+            hash_id = str(uuid.UUID(hashlib.md5(m_id.encode('utf-8')).hexdigest()))
+            
+            payload = {"text": metin, "original_id": m_id}
+            if metadata:
+                payload.update(metadata)
+                
+            points.append(
+                PointStruct(
+                    id=hash_id,
+                    vector=vektor,
+                    payload=payload
+                )
+            )
+            
+        self.client.upsert(
+            collection_name=self.collection_name,
+            points=points
         )
-        print(f"{len(metinler)} adet mevzuat maddesi veritabanına eklendi.")
+        print(f"{len(metinler)} adet mevzuat maddesi Qdrant veritabanına eklendi.")
 
     def mevzuat_sorgula(self, sorgu_metni: str, getirilecek_sonuc_sayisi: int = 2):
         """
         Verilen sorguya en uygun mevzuat maddelerini getirir.
         """
-        sonuclar = self.koleksiyon.query(
-            query_texts=[sorgu_metni],
-            n_results=getirilecek_sonuc_sayisi
-        )
-        return sonuclar["documents"][0]
+        sorgu_vektoru = self._get_embedding(sorgu_metni)
+        
+        sonuclar = self.client.query_points(
+            collection_name=self.collection_name,
+            query=sorgu_vektoru,
+            limit=getirilecek_sonuc_sayisi
+        ).points
+        
+        return [hit.payload.get("text", "") for hit in sonuclar]
 
 # ---------------------------------------------------------
 # GÜN 4: GERÇEK MEVZUAT VERİLERİNİN İNDEKLENMESİ VE TESTİ
@@ -84,20 +132,10 @@ if __name__ == "__main__":
         {"kategori": "Yazisma Kurallari", "yonetmelik": "Resmi Yazisma"}
     ]
     
-    # Veritabanında bu ID'ler yoksa ekle (Hata almamak için basit bir kontrol)
-    mevcut_idler = rag_sistemi.koleksiyon.get()["ids"]
-    eklenecek_metinler = []
-    eklenecek_idler = []
-    eklenecek_metadatalar = []
-    
-    for i in range(len(gercek_idler)):
-        if gercek_idler[i] not in mevcut_idler:
-            eklenecek_metinler.append(gercek_mevzuat_metinleri[i])
-            eklenecek_idler.append(gercek_idler[i])
-            eklenecek_metadatalar.append(gercek_metadatalar[i])
-            
-    if eklenecek_metinler:
-        rag_sistemi.mevzuat_ekle(eklenecek_metinler, eklenecek_idler, eklenecek_metadatalar)
+    # Veritabanında bu ID'ler yoksa ekle (Basit kontrol: Koleksiyon boş mu?)
+    koleksiyon_bilgisi = rag_sistemi.client.get_collection(rag_sistemi.collection_name)
+    if koleksiyon_bilgisi.points_count == 0:
+        rag_sistemi.mevzuat_ekle(gercek_mevzuat_metinleri, gercek_idler, gercek_metadatalar)
     else:
         print("Bu mevzuat maddeleri zaten veritabanında mevcut.")
     

@@ -5,7 +5,7 @@ import warnings
 from pathlib import Path
 from typing import Optional, Union
 
-from openai import OpenAI
+from evren_client import get_evren_client, validate_response_content
 from pydantic import ValidationError
 
 from gorev1.schemas import Gorev1CiktiSemasi
@@ -22,35 +22,6 @@ def get_rag_sistemi() -> MevzuatRAG:
     if _RAG_SISTEMI is None:
         _RAG_SISTEMI = MevzuatRAG()
     return _RAG_SISTEMI
-
-
-def _load_env_file(path: Path) -> None:
-    if not path.exists():
-        return
-
-    for satir in path.read_text(encoding="utf-8").splitlines():
-        satir = satir.strip()
-        if not satir or satir.startswith("#") or "=" not in satir:
-            continue
-
-        anahtar, deger = satir.split("=", 1)
-        anahtar = anahtar.strip()
-        deger = deger.strip().strip('"').strip("'")
-
-        if anahtar and not os.getenv(anahtar):
-            os.environ[anahtar] = deger
-
-
-def _resolve_api_key() -> Optional[str]:
-    api_key = os.getenv("GROQ_API_KEY")
-    if api_key:
-        return api_key
-
-    proje_klasoru = Path(__file__).resolve().parent.parent
-    for dosya_adi in (".env", ".env.example"):
-        _load_env_file(proje_klasoru / dosya_adi)
-
-    return os.getenv("GROQ_API_KEY")
 
 
 GOREV1_SYSTEM_INSTRUCTION = """
@@ -125,13 +96,9 @@ def calistir_gorev1(
     api_key: Optional[str] = None,
 ) -> Gorev1CiktiSemasi:
     """Tek bir ham evrak metnini analiz ederek Görev 1 çıktısı üretir."""
-    resolved_api_key = api_key or _resolve_api_key()
-    selected_model = model_name or os.getenv("GROQ_MODEL", "qwen/qwen3.6-27b")
+    selected_model = model_name or os.getenv("EVREN_MODEL", "llm-fast")
 
-    client = OpenAI(
-        api_key=resolved_api_key,
-        base_url="https://api.groq.com/openai/v1",
-    )
+    client = get_evren_client()
     input_text = _normalize_input(evrak_metni)
 
     rag = get_rag_sistemi()
@@ -165,11 +132,10 @@ Yalnızca aşağıdaki anahtarları kullanarak tek bir JSON nesnesi döndür:
             {"role": "user", "content": prompt},
         ],
         temperature=0.1,
-        max_completion_tokens=2048,
-        extra_body={"reasoning_format": "parsed", "reasoning_effort": "none"},
     )
 
-    raw_text = _remove_thinking(response.choices[0].message.content or "")
+    raw_text = validate_response_content(response)
+    raw_text = _remove_thinking(raw_text)
     raw_text = _remove_code_fence(raw_text)
     if not raw_text:
         raise ValueError("Model boş JSON döndürdü.")
