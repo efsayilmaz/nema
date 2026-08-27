@@ -116,7 +116,7 @@ def _remove_thinking(raw_text: str) -> str:
     return re.sub(r"<think>.*?</think>", "", raw_text, flags=re.DOTALL).strip()
 
 
-def _normalize_payload(payload: dict) -> dict:
+def _normalize_payload(payload: dict, source_text: str = "") -> dict:
     if "sayi_veya_kayit_no" not in payload:
         payload["sayi_veya_kayit_no"] = payload.pop("evrak_sayi_kayit", None)
     if "evrak_ozeti" not in payload:
@@ -165,6 +165,15 @@ def _normalize_payload(payload: dict) -> dict:
     kimlik_yok = not ad_soyad or ad_soyad.lower() in ["belirtilmemiş", "bilinmiyor", "—", "none", "null", "isimsiz"]
     konu_yok = not konu_val or konu_val.lower() in ["konu belirlenemedi", "—", "belirtilmemiş", "none", "null"]
 
+    # OCR / Metin Karinesi: Evrakta başvuranın adı-soyadı yazıyorsa, ıslak imza metne dökülemeyeceğinden
+    # imza var kabul edilir. Yalnızca metinde açıkça 'imzasız' ibaresi varsa imza eksik sayılır.
+    if ad_soyad and not kimlik_yok:
+        eksikler = [
+            e for e in eksikler
+            if not ("imza" in e.lower() and not any(w in source_text.lower() for w in ["imzasız", "imza yok", "imzasiz", "imza atılmamış", "imza eksik"]))
+        ]
+        payload["eksik_bilgiler"] = eksikler
+
     # 1. YALNIZCA KİMLİK VEYA KONU TAMAMEN YOKSA KRİTİK ENGELLENİR:
     if kimlik_yok:
         taslak_olur = False
@@ -178,13 +187,13 @@ def _normalize_payload(payload: dict) -> dict:
         gerekce = "3071 Sayılı Kanun m.6 gereğince konusu ve talebi anlaşılamayan evraklar için resmi yazı taslağı oluşturulamaz."
         zorunlu = [{"bilgi": "Dilekçenin Somut Konusu/Talebi", "mevzuat_maddesi": "3071 Sayılı Kanun Madde 6", "sonuc": "Konusuz başvuru incelenemez."}]
         tamamlanabilir = []
-    # 2. İMZA, TARİH, ADRES, BELGE VB. EKSİKLİKLER KESİNLİKLE TAMAMLANABİLİRDİR VE GÖREV 2'YE GEÇER:
+    # 2. İDARİ VE ŞEKİL EKSİKLİKLERİ KESİNLİKLE TAMAMLANABİLİRDİR VE GÖREV 2'YE GEÇER:
     elif eksikler:
         taslak_olur = True
         derece = "Tamamlanabilir (Eksik Belge Talebi Yazılabilir)"
         gerekce = "Evrakta bazı şekil/idari eksiklikler bulunmakla birlikte başvuru sahibi ve konu belirlidir. Görev 2 aşamasında Eksik Bilgi/Belge Talebi resmi yazısı oluşturulabilir."
         zorunlu = []
-        tamamlanabilir = devam.get("tamamlanabilir_eksikler") or devam.get("zorunlu_olmayan_eksikler") or [
+        tamamlanabilir = [
             {"bilgi": e, "mevzuat_maddesi": "3071 Sayılı Kanun", "sonuc": "Eksik Belge Talebi yazısıyla tamamlanabilir."} for e in eksikler
         ]
     # 3. EKSİKSİZ DURUM:
@@ -278,7 +287,7 @@ def _parse_gorev1_response(raw_text: str, source_text: str = "") -> Gorev1CiktiS
         raise ValueError("Model boş JSON döndürdü.")
 
     try:
-        result = Gorev1CiktiSemasi.model_validate(_normalize_payload(json.loads(raw_text)))
+        result = Gorev1CiktiSemasi.model_validate(_normalize_payload(json.loads(raw_text), source_text))
     except (ValidationError, json.JSONDecodeError, TypeError) as exc:
         raise ValueError(
             "Model çıktısı beklenen şemaya uymuyor. "
@@ -347,4 +356,4 @@ def calistir_gorev1(
             safe_summary = re.sub(r"\b(başkanlığına|müdürlüğüne|belediye|valilik)\b", "", merged["kisa_ozet"], flags=re.IGNORECASE).strip()
             merged["kisa_ozet"] = safe_summary or "Evrak içeriğindeki talep ve bildirim özetlenmiştir."
             merged["evrak_ozeti"] = merged["kisa_ozet"]
-            return Gorev1CiktiSemasi.model_validate(_normalize_payload(merged))
+            return Gorev1CiktiSemasi.model_validate(_normalize_payload(merged, input_text))
