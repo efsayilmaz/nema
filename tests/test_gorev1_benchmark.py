@@ -18,14 +18,18 @@ class DummyCompletions:
         self,
         model,
         messages,
-        temperature,
-        max_completion_tokens,
-        extra_body,
+        temperature=0.1,
+        max_completion_tokens=None,
+        extra_body=None,
+        *args,
+        **kwargs
     ):
         self.calls.append({"model": model, "messages": messages})
         return type("DummyCompletion", (), {"choices": [type(
-            "DummyChoice", (), {"message": type(
-                "DummyMessage", (), {"content": json.dumps({
+            "DummyChoice", (), {
+                "finish_reason": "stop",
+                "message": type(
+                    "DummyMessage", (), {"content": json.dumps({
             "evrak_turu": "Şikayet / İhbar",
             "konu": "Çocuk parkı güvenliği",
             "evrak_tarihi": "15.08.2026",
@@ -68,8 +72,11 @@ CASELER = [
 
 class Gorev1BenchmarkTest(unittest.TestCase):
     def test_case_coverage_and_schema(self):
-        with patch("gorev1.agent.OpenAI") as mock_client, patch("gorev1.agent._resolve_api_key", return_value="dummy_key"):
+        with patch("evren_client.OpenAI") as mock_client, \
+             patch("evren_client._resolve_api_key", return_value="dummy_key"), \
+             patch("gorev1.agent.get_rag_sistemi") as mock_rag:
             mock_client.return_value.chat.completions = DummyCompletions()
+            mock_rag.return_value.mevzuat_sorgula.return_value = "dummy mevzuat baglami"
             for case in CASELER:
                 with self.subTest(case=case["ad"]):
                     sonuc = calistir_gorev1(case["metin"])
@@ -85,8 +92,11 @@ class Gorev1BenchmarkTest(unittest.TestCase):
                     self.assertIn(data["aciliyet_durumu"], {"Normal", "İvedi", "Çok İvedi"})
 
     def test_realistic_risk_detection(self):
-        with patch("gorev1.agent.OpenAI") as mock_client, patch("gorev1.agent._resolve_api_key", return_value="dummy_key"):
+        with patch("evren_client.OpenAI") as mock_client, \
+             patch("evren_client._resolve_api_key", return_value="dummy_key"), \
+             patch("gorev1.agent.get_rag_sistemi") as mock_rag:
             mock_client.return_value.chat.completions = DummyCompletions()
+            mock_rag.return_value.mevzuat_sorgula.return_value = "dummy mevzuat baglami"
             metin = "Çocuk parkında elektrik telleriyle temas eden dallar hayatı tehdit ediyor."
             sonuc = calistir_gorev1(metin)
             self.assertIn(sonuc.aciliyet_durumu, {"İvedi", "Çok İvedi"})
