@@ -89,7 +89,7 @@ def validate_response_content(response) -> str:
     """
     EVREN servisinde 'enable_thinking' açıkken veya max_tokens aşıldığında
     finish_reason="length" ile sessizce boş content dönebilir.
-    Bu durumu yakalayıp düzgün bir hata fırlatır.
+    Bu durumu yakalayıp düzgün bir hata fırlatır
     """
     choice = response.choices[0]
     content = choice.message.content
