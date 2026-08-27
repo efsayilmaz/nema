@@ -26,11 +26,15 @@ class VarliklarSemasi(BaseModel):
 
 class Gorev1CiktiSemasi(BaseModel):
     evrak_turu: str
-    konu: str
+    konu: str = Field(
+        description="Evrakın niyetini ve gerekçesini kendi cümlesiyle anlatan yeni konu. Evrak kimliği, kurum, alıcı, gönderen, tarih, sayı, adres veya 'Konu:' içermez."
+    )
     evrak_tarihi: Optional[str] = None
     sayi_veya_kayit_no: Optional[str] = None
     gonderen: GonderenSemasi
-    kisa_ozet: str
+    kisa_ozet: str = Field(
+        description="Evrakın niyetini ve gerekçesini 1-3 özgün cümleyle anlatır. Evrak kimliği, kurum, alıcı, gönderen, tarih, sayı, adres veya belge başlığını tekrarlamaz."
+    )
     varliklar: VarliklarSemasi
     ilgili_mevzuat_onerisi: List[str] = Field(default_factory=list)
     eksik_bilgiler: List[str] = Field(default_factory=list)

@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import patch
 
 from gorev1 import calistir_gorev1
+from gorev1.agent import _summary_breaks_rule
 
 
 class DummyResponse:
@@ -18,6 +19,14 @@ class DummyCompletions:
         self,
         model,
         messages,
+<<<<<<< HEAD
+        temperature,
+    ):
+        self.calls.append({"model": model, "messages": messages})
+        return type("DummyCompletion", (), {"choices": [type(
+            "DummyChoice", (), {"finish_reason": "stop", "message": type(
+                "DummyMessage", (), {"content": json.dumps({
+=======
         temperature=0.1,
         max_completion_tokens=None,
         extra_body=None,
@@ -30,6 +39,7 @@ class DummyCompletions:
                 "finish_reason": "stop",
                 "message": type(
                     "DummyMessage", (), {"content": json.dumps({
+>>>>>>> 5fd4d78214c1882cc8affbe5a740465ad13f1cb0
             "evrak_turu": "Şikayet / İhbar",
             "konu": "Çocuk parkı güvenliği",
             "evrak_tarihi": "15.08.2026",
@@ -71,12 +81,39 @@ CASELER = [
 
 
 class Gorev1BenchmarkTest(unittest.TestCase):
+    def test_summary_and_topic_reject_header_and_copy(self):
+        payload = {
+            "konu": "İLGİLİ BELEDİYE BAŞKANLIĞINA Tarih: 23.08.2026",
+            "kisa_ozet": "İLGİLİ BELEDİYE BAŞKANLIĞINA Tarih: 23.08.2026",
+            "evrak_tarihi": "23.08.2026",
+            "varliklar": {"kurumlar": ["Belediye"], "tarihler": ["23.08.2026"]},
+        }
+        self.assertTrue(_summary_breaks_rule(payload))
+
+    def test_summary_and_topic_reject_sender_identity(self):
+        payload = {
+            "konu": "Ayşe Yılmaz tarafından yapılan başvurunun değerlendirilmesi",
+            "kisa_ozet": "Ayşe Yılmaz'ın başvurusu incelenerek işlem yapılması istenmektedir.",
+            "gonderen": {
+                "ad_soyad_veya_unvan": "Ayşe Yılmaz",
+                "iletisim_bilgisi": "ayse@example.com",
+            },
+            "varliklar": {"kurumlar": [], "tarihler": []},
+        }
+        self.assertTrue(_summary_breaks_rule(payload))
+
     def test_case_coverage_and_schema(self):
+<<<<<<< HEAD
+        with patch("gorev1.agent.get_evren_client") as mock_client, patch("gorev1.agent.get_rag_sistemi") as mock_rag:
+            mock_client.return_value.chat.completions = DummyCompletions()
+            mock_rag.return_value.mevzuat_sorgula.return_value = []
+=======
         with patch("evren_client.OpenAI") as mock_client, \
              patch("evren_client._resolve_api_key", return_value="dummy_key"), \
              patch("gorev1.agent.get_rag_sistemi") as mock_rag:
             mock_client.return_value.chat.completions = DummyCompletions()
             mock_rag.return_value.mevzuat_sorgula.return_value = "dummy mevzuat baglami"
+>>>>>>> 5fd4d78214c1882cc8affbe5a740465ad13f1cb0
             for case in CASELER:
                 with self.subTest(case=case["ad"]):
                     sonuc = calistir_gorev1(case["metin"])
@@ -92,11 +129,17 @@ class Gorev1BenchmarkTest(unittest.TestCase):
                     self.assertIn(data["aciliyet_durumu"], {"Normal", "İvedi", "Çok İvedi"})
 
     def test_realistic_risk_detection(self):
+<<<<<<< HEAD
+        with patch("gorev1.agent.get_evren_client") as mock_client, patch("gorev1.agent.get_rag_sistemi") as mock_rag:
+            mock_client.return_value.chat.completions = DummyCompletions()
+            mock_rag.return_value.mevzuat_sorgula.return_value = []
+=======
         with patch("evren_client.OpenAI") as mock_client, \
              patch("evren_client._resolve_api_key", return_value="dummy_key"), \
              patch("gorev1.agent.get_rag_sistemi") as mock_rag:
             mock_client.return_value.chat.completions = DummyCompletions()
             mock_rag.return_value.mevzuat_sorgula.return_value = "dummy mevzuat baglami"
+>>>>>>> 5fd4d78214c1882cc8affbe5a740465ad13f1cb0
             metin = "Çocuk parkında elektrik telleriyle temas eden dallar hayatı tehdit ediyor."
             sonuc = calistir_gorev1(metin)
             self.assertIn(sonuc.aciliyet_durumu, {"İvedi", "Çok İvedi"})
