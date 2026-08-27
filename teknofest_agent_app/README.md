@@ -60,11 +60,12 @@ sezgisel (heuristic) bir mock devreye girer.
 ## Klasör yapısı
 
 ```
-app.py                              # Ana sayfa, sidebar, session_state
-pages/
-  1_Gorev_1_Siniflandirma.py        # Görev 1
-  2_Gorev_2_Taslak_Yonlendirme.py   # Görev 2
-  3_Demo_Uctan_Uca.py               # Jüri sunumu için tam akış
+app.py                              # Ana sayfa, sidebar navigasyon, session_state
+views/
+  0_Ana_Sayfa.py                    # Karşılama ve modül yönlendirme
+  1_Evrak_Analizi.py                # Görev 1
+  2_Taslak_Olusturma.py             # Görev 2
+  3_Sistem_Demosu.py                # Jüri sunumu için tam akış
 utils/
   backend_client.py                 # API istemcisi + şema kontratı + mock
   sample_data.py                    # Gerçek ekip verisinden örnekler
