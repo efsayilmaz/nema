@@ -70,8 +70,9 @@ if st.button("Demoyu Çalıştır", type="primary", use_container_width=True):
         st.session_state.gorev2_sonuc = None
         st.session_state.ajan_log = log
         st.divider()
-        st.subheader("Görev 1 Analiz Çıktısı")
-        st.json(analiz)
+        st.subheader("Evrak Analiz Özeti")
+        st.markdown(f"**Evrak Türü:** `{analiz.get('evrak_turu', '—')}` | **Gönderen:** *{(analiz.get('gonderen') or {}).get('ad_soyad_veya_unvan') or 'Belirtilmemiş'}*")
+        st.markdown(f"**Konu:** {analiz.get('konu', '—')}")
         st.stop()
 
     adim2 = st.empty()
@@ -95,11 +96,28 @@ if st.button("Demoyu Çalıştır", type="primary", use_container_width=True):
     st.divider()
     c1, c2 = st.columns(2)
     with c1:
-        st.subheader("Görev 1 Analiz Çıktısı")
-        st.json(analiz)
+        st.subheader("Görev 1: Analiz ve Sınıflandırma")
+        with st.container(border=True):
+            st.markdown(f"**Evrak Türü:** `{analiz.get('evrak_turu', '—')}` | **Aciliyet:** `{analiz.get('aciliyet_durumu', 'Normal')}`")
+            gonderen_ad = (analiz.get('gonderen') or {}).get('ad_soyad_veya_unvan') or '—'
+            st.markdown(f"**Gönderen:** {gonderen_ad}")
+            st.markdown(f"**Konu:** {analiz.get('konu', '—')}")
+            st.markdown(f"**Özet:** {analiz.get('kisa_ozet', '—')}")
+            mevzuatlar = analiz.get('ilgili_mevzuat_onerisi', [])
+            if mevzuatlar:
+                st.markdown(f"**İlgili Mevzuat:** {', '.join(mevzuatlar)}")
     with c2:
-        st.subheader("Görev 2 Taslak ve Yönlendirme")
-        st.json(taslak)
+        st.subheader("Görev 2: Yönlendirme ve Sevk")
+        with st.container(border=True):
+            yon = taslak.get("yonlendirme_karari", {}) or {}
+            bilgi = taslak.get("kullanici_bilgilendirme", {}) or {}
+            taslak_govde = taslak.get("resmi_yazi_taslagi", {}) or {}
+            st.markdown(f"**İşlem Yapacak Kurum:** `{yon.get('islem_yapacak_ana_kurum', '—')}`")
+            st.markdown(f"**Gereği Birimi:** `{yon.get('geregi_icin_yonlendirilecek_birim', '—')}`")
+            st.markdown(f"**Yazı Türü:** `{taslak_govde.get('yazi_turu', '—')}`")
+            if yon.get("yonlendirme_gerekcesi"):
+                st.markdown(f"**Gerekçe:** {yon.get('yonlendirme_gerekcesi')}")
+            st.markdown(f"**Vatandaş Bilgilendirme:** {bilgi.get('kullaniciya_gosterilecek_mesaj', '—')}")
 
     st.divider()
     st.subheader("Nihai Resmî Yazı")

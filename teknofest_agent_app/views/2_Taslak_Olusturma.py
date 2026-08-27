@@ -39,8 +39,6 @@ analiz = st.session_state.gorev1_sonuc
 # Üst Bilgi Çubuğu
 with st.container():
     st.markdown(f"**İncelenen Evrak:** `{analiz.get('evrak_turu', '—')}` | **Konu:** *{analiz.get('konu', '—')}*")
-    with st.expander("Görev 1 Analiz Verilerini İncele"):
-        st.json(analiz)
 
 taslak_olur = analiz.get("taslak_olusturulabilir_mi", True)
 derece = analiz.get("eksik_bilgi_derecesi", "")
@@ -149,6 +147,3 @@ if st.session_state.gorev2_sonuc:
 
     # Vatandaş Mesajı
     st.success(f"**Vatandaş Bilgilendirme:** {bilgilendirme.get('kullaniciya_gosterilecek_mesaj', '—')}")
-
-    with st.expander("Ham JSON Çıktısı"):
-        st.json(s)

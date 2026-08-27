@@ -204,9 +204,6 @@ if st.session_state.gorev1_sonuc:
                 f"{gerekce or 'Evrak yasal ve idari unsurları tam taşımaktadır. Doğrudan üst yazı üretilebilir.'}"
             )
 
-    with st.expander("Ham JSON Çıktı (Backend Kontrolü)"):
-        st.json(s)
-
     st.divider()
     if taslak_olur:
         btn_label = "→  Eksik Belge Talebi Taslağı Oluştur (Görev 2)" if tamamlanabilir_eksikler else "→  Resmi Yazı Taslağı Oluştur (Görev 2)"
