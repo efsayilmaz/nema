@@ -116,7 +116,9 @@ if __name__ == "__main__":
     # 1. Gerçek Kanun Maddelerinden Oluşan Çekirdek Veri Seti
     gercek_mevzuat_metinleri = [
         "3071 Sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun Madde 4: Türkiye Büyük Millet Meclisine veya yetkili makamlara verilen veya gönderilen dilekçelerde, dilekçe sahibinin adı, soyadı ve imzası ile iş veya ikametgâh adresinin bulunması zorunludur.",
-        "3071 Sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun Madde 7: Türk vatandaşlarının ve Türkiye’de ikamet eden yabancıların kendileri ve kamu ile ilgili dilek ve şikayetleri konusunda yetkili makamlara yaptıkları başvuruların sonucu veya yapılmakta olan işlemin safahatı hakkında dilekçe sahiplerine en geç otuz gün içinde gerekçeli olarak cevap verilir.",
+        "3071 Sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun Madde 7: Türk vatandaşlarının ve Türkiye’de ikamet eden yabancıların kendileri ve kamu ile ilgili dilek ve şikayetleri konusunda yetkili makamlara yaptıkları başvuruların sonucu veya yapılmakta olan işlemin safahatı hakkında dilekçe sahiplerine en geç otuz gün içinde gerekçeli olarak cevap verilir. Türk vatandaşlarının ve kurumların idari başvuruları ile 30 günlük yasal yanıt zorunluluğu esastır.",
+        "2547 Sayılı Yükseköğretim Kanunu Madde 14 ve 44: Üniversitelerde eğitim-öğretim, sınav değerlendirme ve öğrenci hakları esasları. Üniversite senatolarının eğitim-öğretim, sınav ve başarı değerlendirme esaslarını belirleme yetkisi ile öğrencilerin sınav değerlendirme, başarı durumu ve eğitim-öğretim sürelerine ilişkin hak ve esasları düzenlenir.",
+        "Yükseköğretim Kurumları Lisans Eğitim-Öğretim ve Sınav Yönetmeliği (Maddi Hata Maddesi): Sınav sonuçlarına ilanından itibaren 5 iş günü içinde maddi hata gerekçesiyle ilgili dekanlığa veya müdürlüğe yazılı olarak itiraz edilebilir. İtiraz, dersin sorumlu öğretim üyesi ve gerektiğinde kurulan komisyon marifetiyle incelenir; tespit edilen maddi hatalar ilgili yönetim kurulu kararıyla düzeltilir.",
         "4982 Sayılı Bilgi Edinme Hakkı Kanunu Madde 4: Herkes bilgi edinme hakkına sahiptir. Türkiye'de ikamet eden yabancılar ve Türkiye'de faaliyette bulunan yabancı tüzel kişiler, isteyecekleri bilgi kendileriyle veya faaliyet alanlarıyla ilgili olmak kaydıyla ve karşılıklılık ilkesi çerçevesinde, bu Kanun hükümlerinden yararlanırlar.",
         "4982 Sayılı Bilgi Edinme Hakkı Kanunu Madde 5: Kurum ve kuruluşlar, bu Kanunda yer alan istisnalar dışındaki her türlü bilgi veya belgeyi başvuranların yararlanmasına sunmak ve bilgi edinme başvurularını etkin, süratli ve doğru sonuçlandırmak üzere, gerekli idarî ve teknik tedbirleri almakla yükümlüdürler.",
         "4982 Sayılı Bilgi Edinme Hakkı Kanunu Madde 6: Bilgi edinme başvurusu, başvuru sahibinin adı ve soyadı, imzası, oturma yeri veya iş adresini, başvuru sahibi tüzel kişi ise tüzel kişinin unvanı ve adresi ile yetkili kişinin imzasını ve yetki belgesini içeren dilekçeyle istenen kurum ve kuruluşa yapılır.",
@@ -131,6 +133,8 @@ if __name__ == "__main__":
     gercek_idler = [
         "mevzuat_3071_m4", 
         "mevzuat_3071_m7",
+        "mevzuat_2547_m14_44",
+        "yonetmelik_yuksekogretim_maddi_hata",
         "mevzuat_4982_m4",
         "mevzuat_4982_m5",
         "mevzuat_4982_m6", 
@@ -143,6 +147,8 @@ if __name__ == "__main__":
     gercek_metadatalar = [
         {"kategori": "Dilekce ve Eksik Bilgi", "kanun": "3071"},
         {"kategori": "Dilekce ve Yanit Suresi", "kanun": "3071"},
+        {"kategori": "Yuksekogretim ve Sinav Esaslari", "kanun": "2547"},
+        {"kategori": "Sinav Degerlendirme ve Maddi Hata", "yonetmelik": "Yuksekogretim Sinav Yonetmeligi"},
         {"kategori": "Bilgi Edinme", "kanun": "4982"},
         {"kategori": "Bilgi Edinme", "kanun": "4982"},
         {"kategori": "Bilgi Edinme", "kanun": "4982"},
@@ -153,15 +159,30 @@ if __name__ == "__main__":
         {"kategori": "Yazisma Kurallari", "yonetmelik": "Resmi Yazisma"}
     ]
     
-    # Veritabanında bu ID'ler yoksa ekle (Basit kontrol: Koleksiyon boş mu?)
-    koleksiyon_bilgisi = rag_sistemi.client.get_collection(rag_sistemi.collection_name)
-    if koleksiyon_bilgisi.points_count == 0:
-        rag_sistemi.mevzuat_ekle(gercek_mevzuat_metinleri, gercek_idler, gercek_metadatalar)
-    else:
-        print("Bu mevzuat maddeleri zaten veritabanında mevcut.")
-    
+    # 3. Veritabanına Ekle / Güncelle (Qdrant Upsert)
+    print("Mevzuat veritabanı güncelleniyor...")
+    rag_sistemi.mevzuat_ekle(gercek_mevzuat_metinleri, gercek_idler, gercek_metadatalar)
+
+    # 4. ChromaDB Güncellemesi (Varsa)
+    try:
+        import chromadb
+        chroma_client = chromadb.PersistentClient(path="./chroma_db")
+        embeddings = [rag_sistemi._get_embedding(m) for m in gercek_mevzuat_metinleri]
+        
+        # mevzuat_bilgi_tabani_evren koleksiyonu
+        c_evren = chroma_client.get_or_create_collection("mevzuat_bilgi_tabani_evren")
+        c_evren.upsert(
+            ids=gercek_idler,
+            documents=gercek_mevzuat_metinleri,
+            embeddings=embeddings,
+            metadatas=gercek_metadatalar,
+        )
+        print(f"ChromaDB 'mevzuat_bilgi_tabani_evren' koleksiyonu güncellendi (Toplam: {c_evren.count()} kayıt).")
+    except Exception as exc:
+        print(f"ChromaDB güncelleme uyarısı: {exc}")
+
     # ---------------------------------------------------------
-    # GÜN 5: RAG SORGU MEKANİZMASININ TEST EDİLMESİ
+    # RAG SORGU MEKANİZMASININ TEST EDİLMESİ
     # ---------------------------------------------------------
     print("\n--- RAG SİSTEMİ TEST EDİLİYOR ---")
     
@@ -172,3 +193,7 @@ if __name__ == "__main__":
     test_sorgusu_2 = "Telefonum bozuk çıktı, ayıplı mal iadesi veya ücretsiz tamir hakkım var mı?"
     cevap_2 = rag_sistemi.mevzuat_sorgula(test_sorgusu_2, getirilecek_sonuc_sayisi=1)
     print(f"\nSoru 2: {test_sorgusu_2}\nBulunan Mevzuat: {cevap_2[0]}")
+
+    test_sorgusu_3 = "Sınav notuma maddi hata itirazında bulunmak istiyorum, süre ve usul nedir?"
+    cevap_3 = rag_sistemi.mevzuat_sorgula(test_sorgusu_3, getirilecek_sonuc_sayisi=2)
+    print(f"\nSoru 3: {test_sorgusu_3}\nBulunan Mevzuatlar: {cevap_3}")
