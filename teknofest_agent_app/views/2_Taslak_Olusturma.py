@@ -1,87 +1,16 @@
 import streamlit as st
+import sys
+import os
+
+# Proje kök dizini ve app dizinini sys.path'e ekleyelim
+current_dir = os.path.dirname(os.path.abspath(__file__))
+app_dir = os.path.abspath(os.path.join(current_dir, '..'))
+root_dir = os.path.abspath(os.path.join(current_dir, '../..'))
+for path in [app_dir, root_dir]:
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
 from utils.backend_client import gorev2_taslak
-
-st.set_page_config(
-    page_title="Taslak Oluşturma",
-    page_icon="",
-    layout="wide",
-)
-
-# --------------------------------------------------------------------------
-# Kurumsal Tema, Kristal Sidebar ve A4 Belge Görünümü
-# --------------------------------------------------------------------------
-st.markdown(
-    """
-    <style>
-    h1 {
-        color: #0f172a;
-        font-weight: 700;
-        letter-spacing: -0.5px;
-    }
-    .system-desc {
-        color: #334155;
-        font-size: 1.02rem;
-        line-height: 1.6;
-        margin-bottom: 1.2rem;
-        border-left: 4px solid #1e3a8a;
-        padding: 10px 14px;
-        background-color: #f8fafc;
-        border-radius: 0 8px 8px 0;
-    }
-    
-    /* ASİL & KRİSTAL BUZ MAVİSİ SIDEBAR */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #f0f5fa 0%, #e2edf8 100%) !important;
-        border-right: 1px solid #d0e1f0 !important;
-        box-shadow: 2px 0 10px rgba(15, 23, 42, 0.03);
-    }
-
-    /* Sol Menü İsimlerini Düzenleme */
-    ul[data-testid="stSidebarNavItems"] li:nth-child(1) span { display: none !important; }
-    ul[data-testid="stSidebarNavItems"] li:nth-child(1) a::after { content: "Ana Sayfa" !important; font-weight: 500 !important; }
-
-    ul[data-testid="stSidebarNavItems"] li:nth-child(2) span { display: none !important; }
-    ul[data-testid="stSidebarNavItems"] li:nth-child(2) a::after { content: "Evrak Analizi" !important; font-weight: 500 !important; }
-
-    ul[data-testid="stSidebarNavItems"] li:nth-child(3) span { display: none !important; }
-    ul[data-testid="stSidebarNavItems"] li:nth-child(3) a::after { content: "Taslak Oluşturma" !important; font-weight: 600 !important; }
-
-    ul[data-testid="stSidebarNavItems"] li:nth-child(4) span { display: none !important; }
-    ul[data-testid="stSidebarNavItems"] li:nth-child(4) a::after { content: "Sistem Demosu" !important; font-weight: 500 !important; }
-
-    /* A4 Resmi Belge Kartı */
-    .document-card {
-        background-color: #ffffff;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        padding: 20px 24px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        margin-bottom: 15px;
-    }
-    .doc-meta {
-        font-size: 0.95rem;
-        color: #334155;
-        margin-bottom: 6px;
-    }
-    
-    /* Kurumsal Metrik Kartları */
-    div[data-testid="stMetric"] {
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 10px 14px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-for key, value in {
-    "backend_url": "", "demo_mode": True, "evrak_metni": "",
-    "gorev1_sonuc": None, "gorev2_sonuc": None, "ajan_log": [],
-}.items():
-    if key not in st.session_state:
-        st.session_state[key] = value
 
 _DURUM_RENK = {"İşleme Alındı": "", "Kullanıcı Bekleniyor": "", "Onay Bekliyor": ""}
 
@@ -102,7 +31,7 @@ st.markdown(
 
 if not st.session_state.gorev1_sonuc:
     st.warning("Önce Evrak Analizi modülünde bir evrak analiz etmelisiniz.")
-    st.page_link("pages/1_Gorev_1_Siniflandirma.py", label="← Evrak Analizine Git")
+    st.page_link("views/1_Evrak_Analizi.py", label="← Evrak Analizine Git")
     st.stop()
 
 analiz = st.session_state.gorev1_sonuc
