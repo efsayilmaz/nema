@@ -28,28 +28,43 @@ Verilen evrak analizini dikkatle inceleyerek aşağıdaki iki temel bileşenden 
    - `yonlendirme_gerekcesi`: Mevzuat, aciliyet ve görev alanına dayanan açıklayıcı gerekçe.
 
 2. RESMÎ YAZI TASLAĞI (`resmi_yazi_taslagi`):
-   - `yazi_turu`: Yalnızca şu 3 değerden biri olmalıdır: "Üst Yazı", "Cevap Yazısı", "Bilgilendirme Metni". (Eksik Bilgi/Belge Talebi bu ajanın sorumluluğunda değildir).
+   - `yazi_turu`: Yalnızca şu 3 değerden biri olmalıdır: "Üst Yazı", "Cevap Yazısı", "Bilgilendirme Metni".
    - `konu`: Resmî yazının özü ve mevzuata uygun konusu.
    - `ilgi`: Evraka referans veren resmî ilgi tutma cümlesi (örn: "14.11.2025 tarihli ve E-27584916-302-124 numaralı dilekçe.").
-   - `govde_metni`: Yazının yalnızca özü, kararı ve gerekçesini anlatan sade içerik metni. Başlık, İlgi, Arz/Rica, İmza GİBİ ŞABLONLARI kesinlikle EKLEMEYİN. Sadece asıl paragrafı yazın.
-   - `imza_makami`: Yazıyı imzalayacak/onaylayacak yetkili makam unvanı (örn: Dekan Yardımcısı, Birim Amiri, Daire Başkanı vb.).
+   - `govde_metni`: Yazının yalnızca özünü, kararını ve gerekçesini anlatan içerik metni.
+     * Başlık, Sayı, Tarih, Konu, İlgi, Arz/Rica, İmza ŞABLONLARINI KESİNLİKLE EKLEME. Sadece asıl paragraf(lar)ı yaz.
+     * ZORUNLU: govde_metni tam ve eksiksiz bir cümleyle BİTMELİDİR. "...hususlarını bilgilerinize ve" veya "...gereğine" gibi YARI BİTMİŞ ifadelerle ASLA BITMEMELIDIR. Son cümle nokta (.) ile kapanmalıdır.
+     * Talep/eylem cümlelerini "...sağlanması hususunda bilgilerinizi ve gereğini arz ederim." veya "...alınması hususunu saygıyla arz ederim." gibi kalıplarla TAM olarak kapat. Asla "...sağlanması." gibi fiil+nokta ile bırakma.
+   - `imza_makami`: Yazıyı imzalayacak/onaylayacak yetkili makam unvanı.
+     * KRİTİK KURAL: Bu alan için kaynak evrakta açıkça belirtilmiş bir imzacı/yetkili isim veya unvan YOKSA, kesinlikle UYDURMA. Bunun yerine tam olarak şu değeri kullan: "[İMZALAYAN MAKAM - DOLDURULACAK]"
+     * Kaynak metinde varsa: gerçek unvanı yaz (örn: Vali Yardımcısı, İl Sağlık Müdürü). Yoksa: "[İMZALAYAN MAKAM - DOLDURULACAK]"
 
 ZORUNLU RESMÎ YAZI METNİ ÜRETİM KURALLARI (ASLA İHLAL EDİLEMEZ):
 1. BAŞLIK VE YER TUTUCU (PLACEHOLDER) YASAĞI:
    - Evrakta belirtilmeyen veya taslak ifadeler olan "T.C. / KAMU KURUMU", "[Kurum Adı]", "..." gibi yer tutucuları asla kullanmayın. Belgelerden gerçek kurum ve makam adını tam ve eksiksiz tespit edip kullanın.
 2. STANDART YAZI BLOKLARI:
    - Alıcı Makam Bloğu tam adıyla ve yönelme eki getirilerek BÜYÜK HARFLERLE yazılmalıdır (Örn: "SOSYAL GÜVENLİK KURUMU BAŞKANLIĞINA"). Varsa ilgi satırını ekleyin.
-3. ARZ / RİCA KESİNLİĞİ:
-   - "Gereğini/Bilgilerinize arz/rica ederim" gibi alternatifli veya eğik çizgili (/) ifadeler KESİNLİKLE YASAKTIR. Hiyerarşiye göre sadece tek bir kesin ifade seçin:
-     * Üst makama: "Gereğini arz ederim." veya "Bilgilerinizi ve gereğini arz ederim."
-     * Alt makama/vatandaşa: "Gereğini rica ederim."
-     * Bilgilendirme amaçlı üst makama: "Bilgilerinize arz ederim."
+3. ARZ / RİCA KESİNLİĞİ VE EYLEM AYRIMI (KRİTİK KURAL):
+   - "Gereğini/Bilgilerinize arz/rica ederim" gibi alternatifli veya eğik çizgili (/) ifadeler KESİNLİKLE YASAKTIR.
+   - Yazının içeriğine göre hiyerarşi ve amaç belirlenerek SADECE TEK BİR kesin ifade seçilir:
+     * Eylem/Müdahale/İnceleme TALEP eden üst yazı (jeneratör, destek, inceleme, izin talebi vb.) → "Gereğini arz ederim." (Üst makama)
+     * Alt makama/birima emir/yönlendirme → "Gereğini rica ederim."
+     * SADECE bilgi iletimi amaçlı (hiçbir eylem/talep YOK) ve üst makama → "Bilgilerinize arz ederim."
+     * YANLIŞ KULLANIM: Eylem/müdahale talep eden bir yazıda "Bilgilerinize arz ederim." KULLANILAMAZ.
 4. TÜRKÇE BÜYÜK HARF (İ/I) DÜZELTME KURALI:
    - Türkçe büyük harf dönüşümlerinde noktalı "İ" karakterini koruyun. "TALEBI" -> "TALEBİ", "IÇIN" -> "İÇİN", "ILGILI" -> "İLGİLİ", "BILGILERINIZE" -> "BİLGİLERİNİZE".
 5. VERİ VE KİMLİK DOĞRULUĞU:
    - 11 haneli numaraları T.C. Kimlik No, 10 haneli numaraları Vergi Kimlik No olarak etiketleyin/doğrulayın.
+6. HALÜSİNASYON YASAĞI (KRİTİK):
+   - Kaynak evrak analizinde BULUNMAYAN hiçbir özel isim, unvan, makam, kurum, tarih veya sayısal değer UYDURULAMAZ.
+   - Eksik veya belirsiz bilgi için: İsim/Unvan eksikse "[İMZALAYAN MAKAM - DOLDURULACAK]", kurum eksikse "[İLGİLİ KURUM]", tarih eksikse "[TARİH]" gibi açık placeholder kullan.
+   - Her çalıştırmada tutarsız/farklı bilgi üretmek (hallucination) yasaktır. Belirsizse sabit placeholder kullan.
 
+
+JSON FORMAT KURALLARI (ÇOK ÖNEMLİ):
 YALNIZCA geçerli bir JSON nesnesi döndür. Markdown, açıklama veya düşünme metni YAZMA.
+JSON string değerleri içinde ASLA çift tırnak (") kullanma, alıntı yapman gerekirse tek tırnak (') kullan.
+Metin içinde satır atlamak (Enter) yerine KESİNLİKLE \n (ters bölü n) kaçış dizisini kullan, aksi halde JSON kırılır.
 """
 
 
@@ -379,22 +394,75 @@ def _format_resmi_yazi(taslak: ResmiYaziTaslagi, yonlendirme: Optional[Yonlendir
     yazi_turu_val = getattr(taslak.yazi_turu, "value", str(taslak.yazi_turu))
     
     govde = taslak.govde_metni.strip()
+    
+    # Arz/Rica ifadelerini gövdeden temizle (şablon olarak ayrı eklenecek)
     pattern_clean = r'(?:gereğini|bilgilerinizi?\s*(?:ve\s*gereğini)?)\s*(?:arz/rica|arz|rica)\s*ederim\.?$'
     govde = re.sub(pattern_clean, "", govde, flags=re.IGNORECASE).strip()
     govde = re.sub(r'(?:arz/rica|arz\s*ve\s*rica|arz|rica)\s*ederim\.?$', "", govde, flags=re.IGNORECASE).strip()
     govde = re.sub(r'bilgilerinize\s*sunarım\.?$', "", govde, flags=re.IGNORECASE).strip()
     govde = re.sub(r'bilgilerinize\s*arz\s*ederim\.?$', "", govde, flags=re.IGNORECASE).strip()
+    govde = re.sub(r'hususunu\s*arz\s*ederim\.?$', "hususunu", govde, flags=re.IGNORECASE).strip()
+    govde = re.sub(r'hususlar[ıi]n[ıi]\s*(bilgilerinize\s*(ve\s*)?)?$', "", govde, flags=re.IGNORECASE).strip()
     govde = govde.rstrip(",. ")
+    
+    # Yarım cümle tespiti: "ve", "için", "ile", "hususunu" gibi bağlaçlarla bitmişse düzelt
+    YARIM_BITIS_PATTERN = re.compile(
+        r'\b(ve|için|ile|hususunu|gereğine|bilgilerinize|hususlarını|amacıyla|itibarıyla|bakımından)\s*$',
+        re.IGNORECASE
+    )
+    if YARIM_BITIS_PATTERN.search(govde):
+        # Yarım biten son cümleyi sil, önceki tam cümleyi koru
+        sentences = re.split(r'(?<=[.!?])\s+', govde)
+        if len(sentences) > 1:
+            govde = " ".join(sentences[:-1]).strip()
+        else:
+            # Tek cümle yarım bitmişse nokta ekle
+            govde = govde.rstrip(",. ") + "."
 
+    # Arz/Rica: içerik tipine göre otomatik seç
+    # Eylem/talep içeriyorsa "Gereğini arz ederim", sadece bilgi ise "Bilgilerinize arz ederim"
+    EYLEM_KELIMELERI = ["talep", "müdahale", "inceleme", "değerlendirme", "gerekli", "jeneratör",
+                        "destek", "tedbir", "işlem", "sevk", "yaptırım", "belirlenmesi", "sağlanması"]
+    govde_lower = govde.lower()
+    govde_eylem_iceriyor = any(k in govde_lower for k in EYLEM_KELIMELERI)
+    
     raw_arz_rica = ""
     last_sentences = re.findall(r'[^.!?]+[.!?]?', taslak.govde_metni)
     if last_sentences:
         last_s = last_sentences[-1].strip()
         if "arz" in last_s.lower() or "rica" in last_s.lower():
             raw_arz_rica = last_s
-            
+    
+    # Eğer govde eylem içeriyorsa, "Bilgilerinize" ifadesini "Gereğini" ile değiştir
     arz_rica = sanitize_arz_rica(raw_arz_rica, yazi_turu_val, sender_kurum, alici)
-    imza = taslak.imza_makami.strip()
+    if govde_eylem_iceriyor and arz_rica == "Bilgilerinize arz ederim.":
+        arz_rica = "Gereğini arz ederim."
+    
+    imza_ham = taslak.imza_makami.strip()
+    
+    # HALÜSİNASYON GUARD: Kaynak evrakta imzalayan makam bilgisi yoksa LLM'in
+    # ürettiği değeri sil ve standart placeholder kullan.
+    PLACEHOLDER = "[İMZALAYAN MAKAM - DOLDURULACAK]"
+    imza_kaynak_var = False
+    if girdi_dict:
+        gonderen = girdi_dict.get("gonderen", {})
+        # Kaynak evrak bir kamu kurumundan geliyorsa ve unvan belirtilmişse gerçek imzacı olabilir
+        if gonderen.get("gonderen_tipi") == "Kamu Kurumu" and gonderen.get("ad_soyad_veya_unvan"):
+            imza_kaynak_var = True
+        # Ayrıca imzalayan makam açıkça boş veya belirsiz bırakılmışsa
+        if not gonderen.get("ad_soyad_veya_unvan") or gonderen.get("ad_soyad_veya_unvan", "").strip() in ["", "Belirtilmemiş", "null"]:
+            imza_kaynak_var = False
+    
+    # Eğer LLM placeholder döndürdüyse olduğu gibi kullan
+    if "[" in imza_ham and "MAKAM" in imza_ham.upper():
+        imza = PLACEHOLDER
+    # Kaynak yoksa ve LLM uydurmuşsa override et
+    elif not imza_kaynak_var:
+        # LLM bir şey yazmış ama kaynakta yok → placeholder ile değiştir
+        imza = PLACEHOLDER
+    else:
+        imza = imza_ham
+
 
     full_text = f"""{sender_header}
 
@@ -470,11 +538,48 @@ Beklenen JSON Şeması:
             raw_text = re.sub(r"/\*.*?\*/", "", raw_text, flags=re.DOTALL)
             raw_text = re.sub(r",\s*([}\]])", r"\1", raw_text)
 
+            def _onar_json(text: str) -> str:
+                """JSON string değerlerindeki kaçırılmamış karakterleri düzeltir."""
+                # Literal (gerçek) newline ve tab'ları JSON kaçış dizisine çevir
+                # Sadece JSON string değerlerinin içinde, key'ler dışında
+                lines = []
+                in_string = False
+                result = []
+                i = 0
+                while i < len(text):
+                    c = text[i]
+                    if c == '\\' and i + 1 < len(text):
+                        result.append(c)
+                        result.append(text[i+1])
+                        i += 2
+                        continue
+                    if c == '"':
+                        in_string = not in_string
+                        result.append(c)
+                    elif in_string and c == '\n':
+                        result.append('\\n')
+                    elif in_string and c == '\r':
+                        result.append('\\r')
+                    elif in_string and c == '\t':
+                        result.append('\\t')
+                    else:
+                        result.append(c)
+                    i += 1
+                return ''.join(result)
+
+            raw_text_onarildi = _onar_json(raw_text)
+
             try:
-                cikti = TaslakYonlendirmeCiktisi.model_validate_json(raw_text)
+                cikti = TaslakYonlendirmeCiktisi.model_validate_json(raw_text_onarildi)
             except Exception:
-                payload = json.loads(raw_text)
-                cikti = TaslakYonlendirmeCiktisi.model_validate(payload)
+                try:
+                    payload = json.loads(raw_text_onarildi)
+                    cikti = TaslakYonlendirmeCiktisi.model_validate(payload)
+                except Exception:
+                    # Son çare: raw_text'i dene (onarım bazen bozabilir)
+                    payload = json.loads(raw_text)
+                    cikti = TaslakYonlendirmeCiktisi.model_validate(payload)
+
 
             return cikti
 

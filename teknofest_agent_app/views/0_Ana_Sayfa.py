@@ -51,7 +51,25 @@ with st.container():
 
 st.divider()
 
-# ----------------- Modül 3: Demo -----------------
+# ----------------- Modül 3: Emsal Taslak Arşivi -----------------
+with st.container():
+    c_info, c_btn = st.columns([3.8, 1.2], vertical_alignment="center")
+    with c_info:
+        st.markdown(
+            """
+            <div style="padding-left: 4px;">
+                <div class="module-title">Emsal Taslak Arşivi</div>
+                <p class="module-desc">KVKK kurallarına uygun olarak anonimleştirilmiş ve denetimden geçmiş emsal taslakları görüntüleyin.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with c_btn:
+        st.page_link("views/arsiv.py", label="Arşive Git →")
+
+st.divider()
+
+# ----------------- Modül 4: Demo -----------------
 with st.container():
     c_info, c_btn = st.columns([3.8, 1.2], vertical_alignment="center")
     with c_info:
@@ -68,7 +86,3 @@ with st.container():
         st.page_link("views/3_Sistem_Demosu.py", label="Demoyu Başlat →")
 
 st.divider()
-
-if st.session_state.ajan_log:
-    with st.expander("Son ajan işlem günlüğü"):
-        st.table(st.session_state.ajan_log[-10:])

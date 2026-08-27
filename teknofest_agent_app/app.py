@@ -229,6 +229,7 @@ pages = [
     st.Page("views/0_Ana_Sayfa.py", title="Ana Sayfa", default=True),
     st.Page("views/1_Evrak_Analizi.py", title="Evrak Analizi"),
     st.Page("views/2_Taslak_Olusturma.py", title="Taslak Oluşturma"),
+    st.Page("views/arsiv.py", title="Emsal Taslak Arşivi"),
     st.Page("views/3_Sistem_Demosu.py", title="Sistem Demosu"),
 ]
 

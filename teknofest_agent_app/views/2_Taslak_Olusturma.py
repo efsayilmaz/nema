@@ -117,20 +117,15 @@ if st.session_state.gorev2_sonuc:
         st.markdown(f"**Yazı Türü:** `{taslak.get('yazi_turu', '—')}`")
         st.markdown(f"**İmza:** `{taslak.get('imza_makami', '—')}`")
 
-    # Metin Düzenleme Alanı
+    # Metin Düzenleme Alanı (Backend zaten tam formatlı resmi yazıyı döndürür)
     duzenlenmis_govde = st.text_area(
-        "Yazı Gövde Metni",
+        "Nihai Resmî Yazı (Düzenlenebilir)",
         value=taslak.get("govde_metni", ""),
-        height=180,
+        height=350,
         help="Gerekirse doğrudan üzerinde düzeltme yapabilirsiniz.",
     )
 
-    tam_metin = (
-        f"KONU: {taslak.get('konu', '')}\n\n"
-        f"İlgi: {taslak.get('ilgi', '')}\n\n"
-        f"{duzenlenmis_govde}\n\n"
-        f"{taslak.get('imza_makami', '')}"
-    )
+    tam_metin = duzenlenmis_govde
 
     # İndirme ve Durum Çubuğu
     btn_c, info_c = st.columns([1, 2.5], vertical_alignment="center")
@@ -147,3 +142,65 @@ if st.session_state.gorev2_sonuc:
 
     # Vatandaş Mesajı
     st.success(f"**Vatandaş Bilgilendirme:** {bilgilendirme.get('kullaniciya_gosterilecek_mesaj', '—')}")
+
+    st.divider()
+    
+    # Arşivleme ve Onay Süreci
+    st.subheader("🔒 Güvenlik ve Arşiv Onayı")
+    st.info("Elde edilen bu taslağı sisteme 'Emsal Karar' olarak kaydetmek istiyorsanız çift katmanlı KVKK maskeleme ve arşiv onayı sürecini başlatın.")
+    
+    c_onay1, c_onay2 = st.columns(2)
+    with c_onay1:
+        if st.button("Hukuki / İçerik Onayını Ver", use_container_width=True):
+            st.toast("✅ İçerik hukuki olarak uygun bulundu.")
+            st.session_state["icerik_onaylandi"] = True
+    with c_onay2:
+        if st.button("KVKK Maskeleme Sürecini Başlat", type="primary", use_container_width=True):
+            if st.session_state.get("icerik_onaylandi"):
+                # Maskeleme ajanını çağır (şimdilik simüle veya LLM çağrısı yapılabilir)
+                # Sisteminizdeki gerçek arşiv veritabanına kaydedelim
+                try:
+                    from utils.arsiv_db import arsive_ekle
+                    import uuid
+                    import datetime
+                    
+                    mevzuat_listesi = analiz.get("ilgili_mevzuat_onerisi", [])
+                    from gorev2.arsiv_ajani import arsiv_kayit_talebi_olustur
+                    from evren_client import get_evren_client
+                    import uuid
+                    import datetime
+                    
+                    mevzuat_listesi = analiz.get("ilgili_mevzuat_onerisi", [])
+                    uyumlu_mevzuat = mevzuat_listesi[0] if mevzuat_listesi else "Belirtilmedi"
+                    sektor = analiz.get("evrak_turu", "Genel İdari")
+                    
+                    with st.spinner("🤖 2 Aşamalı LLM KVKK Denetimi (Maskeleme + Doğrulama) yapılıyor..."):
+                        talep = arsiv_kayit_talebi_olustur(tam_metin, sektor, get_evren_client())
+                    
+                    if talep["guvenlik_durumu"] == "MANUEL_INCELEME":
+                        st.error("⚠️ 2. Aşama LLM veya Regex denetiminde sızıntı riski tespit edildi! (Özel veri kalmış olabilir)")
+                        with st.expander("Denetim Raporu Detayı"):
+                            st.json(talep["denetim_raporu"])
+                        st.error("🚨 GÜVENLİK İHLALİ RİSKİ: Bu evrak otomatik olarak arşive (Qdrant'a) EKLENMEDİ. Lütfen Manuel İnceleme Kuyruğu'na gidiniz.")
+                        # BURADA KAYIT İŞLEMİ KESİLİYOR
+                        st.session_state["icerik_onaylandi"] = False
+                    else:
+                        from utils.arsiv_db import arsive_ekle
+                        yeni_kayit = {
+                            "id": f"ARS-{datetime.date.today().strftime('%Y-%m')}-{str(uuid.uuid4())[:4].upper()}",
+                            "sektor": sektor,
+                            "tarih": datetime.date.today().strftime("%Y-%m-%d"),
+                            "konu": taslak.get("konu", "Belirtilmedi"),
+                            "onaylayanlar": ["İçerik Uzmanı", "KVKK Otomatı: KABUL"],
+                            "anonim_metin": talep["anonim_taslak"],
+                            "kullanım_sayisi": 0,
+                            "uyumlu_mevzuat": uyumlu_mevzuat
+                        }
+                        arsive_ekle(yeni_kayit)
+                        st.success("🎉 Taslak 2 aşamalı kontrolden başarıyla geçti ve GERÇEK Emsal Arşivi'ne temiz şekilde eklendi!")
+                        st.session_state["icerik_onaylandi"] = False
+
+                except Exception as e:
+                    st.error(f"Kayıt sırasında hata oluştu: {str(e)}")
+            else:
+                st.warning("Lütfen önce taslağın hukuki (içerik) onayını verin.")
