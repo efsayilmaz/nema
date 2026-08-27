@@ -84,12 +84,23 @@ def sadece_gorev2(istek: Gorev2Istek):
     try:
         girdi = dict(istek.gorev1_ciktisi)
         ek_bilgi = istek.ek_bilgi
+
+        # Mevzuata göre kritik eksik kontrolü:
+        if girdi.get("taslak_olusturulabilir_mi") is False and not (ek_bilgi and ek_bilgi.strip()):
+            gerekce = girdi.get("isleme_devam_gerekcesi") or "3071 Sayılı Kanun gereğince zorunlu kimlik/talep bilgisi olmadan taslak üretilemez."
+            raise HTTPException(
+                status_code=400,
+                detail=f"Mevzuat Engeli: {gerekce} Lütfen ek bilgi/not girişi yaparak eksiklikleri tamamlayınız."
+            )
+
         if ek_bilgi:
             girdi["sistem_mesaji"] = f"Eksik bilgi geldi, artık üst yazı yazabilirsin. Gelen bilgi: {ek_bilgi}"
             if "eksik_bilgiler" in girdi:
                 girdi["eksik_bilgiler"] = []
         sonuc = calistir_gorev2(girdi)
         return {"gorev2_ciktisi": sonuc.model_dump(mode="json")}
+    except HTTPException:
+        raise
     except Exception as exc:
         import traceback
         print(f"HATA DETAYI:\n{traceback.format_exc()}")

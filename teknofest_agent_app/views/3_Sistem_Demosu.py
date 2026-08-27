@@ -60,6 +60,20 @@ if st.button("Demoyu Çalıştır", type="primary", use_container_width=True):
     if hata1:
         st.warning(hata1)
 
+    if analiz.get("taslak_olusturulabilir_mi") is False:
+        adim2 = st.empty()
+        adim2.error(
+            f"⛔ Mevzuat Engeli ({analiz.get('eksik_bilgi_derecesi', 'Kritik')}): "
+            f"{analiz.get('isleme_devam_gerekcesi', 'Zorunlu kimlik/talep bilgisi olmadan resmi yazı taslağı oluşturulamaz.')}"
+        )
+        st.session_state.gorev1_sonuc = analiz
+        st.session_state.gorev2_sonuc = None
+        st.session_state.ajan_log = log
+        st.divider()
+        st.subheader("Görev 1 Analiz Çıktısı")
+        st.json(analiz)
+        st.stop()
+
     adim2 = st.empty()
     with st.spinner("Yazı Taslaklama ve Yönlendirme Ajanı çalışıyor..."):
         t0 = time.time()

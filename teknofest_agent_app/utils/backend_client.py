@@ -191,7 +191,25 @@ def _sezgisel_gorev1(evrak_metni):
     else:
         aciliyet = "Normal"
 
-    cumleler = [c.strip() for c in re.split(r"[.\n]", metin) if len(c.strip()) > 20]
+    if not ad_soyad and gonderen_tipi == "Gerçek Kişi":
+        taslak_olur = False
+        derece = "Kritik (Taslak Üretilemez / İşleme Alınamaz)"
+        gerekce = "3071 Sayılı Kanun m.4/6 gereğince başvuru sahibinin adı-soyadı olmadan resmi yazı taslağı oluşturulamaz."
+        zorunlu = [{"bilgi": "Başvuru Sahibinin Adı ve Soyadı", "mevzuat_maddesi": "3071 Sayılı Kanun Madde 4 ve 6", "sonuc": "Kimliksiz başvuru incelenemez."}]
+        tamamlanabilir = []
+    elif eksikler:
+        taslak_olur = True
+        derece = "Tamamlanabilir (Eksik Belge Talebi Yazılabilir)"
+        gerekce = "Evrakta bazı şekil/idari eksiklikler bulunmakla birlikte başvuru sahibi belirlidir. Görev 2'de Eksik Belge Talebi yazısı oluşturulabilir."
+        zorunlu = []
+        tamamlanabilir = [{"bilgi": e, "mevzuat_maddesi": "3071 Sayılı Kanun", "sonuc": "Eksik Belge Talebi yazısıyla tamamlanabilir."} for e in eksikler]
+    else:
+        taslak_olur = True
+        derece = "Eksiksiz (Doğrudan Üst Yazı Yazılabilir)"
+        gerekce = "Evrak yasal ve idari unsurları tam taşımaktadır. Doğrudan yetkili makama üst yazı üretilebilir."
+        zorunlu = []
+        tamamlanabilir = []
+
     kisa_ozet = "Özet oluşturulamadı; ham metin gösteriliyor."
 
     return {
@@ -215,6 +233,17 @@ def _sezgisel_gorev1(evrak_metni):
         },
         "ilgili_mevzuat_onerisi": mevzuat or ["Resmî Yazışmalarda Uygulanacak Usul ve Esaslar Hakkında Yönetmelik"],
         "eksik_bilgiler": eksikler,
+        "isleme_devam_edilebilirlik_durumu": {
+            "taslak_olusturulabilir_mi": taslak_olur,
+            "derece": derece,
+            "gerekce": gerekce,
+            "zorunlu_eksikler": zorunlu,
+            "tamamlanabilir_eksikler": tamamlanabilir,
+            "zorunlu_olmayan_eksikler": tamamlanabilir,
+        },
+        "taslak_olusturulabilir_mi": taslak_olur,
+        "eksik_bilgi_derecesi": derece,
+        "isleme_devam_gerekcesi": gerekce,
         "aciliyet_durumu": aciliyet,
     }
 
@@ -252,40 +281,42 @@ def _sezgisel_gorev2(analiz_sonucu, ek_bilgi):
             f"iletilmesi gerekmektedir: " + ", ".join(kalan_eksikler) + "."
         )
     elif evrak_turu == "Dilekçe":
-        yazi_turu = "Cevap Yazısı"
+        yazi_turu = "Üst Yazı"
         govde = (
-            f"İlgide kayıtlı dilekçeniz ({konu}) incelenmiş olup, konu {birim} tarafından "
-            f"değerlendirmeye alınmıştır. Sonuç tarafınıza ayrıca bildirilecektir."
-            + (f"\n\nTarafınızca iletilen ek bilgi değerlendirmeye alınmıştır: {ek_bilgi}" if ek_bilgi_var else "")
+            f"İlgide kayıtlı dilekçe ile {ad_soyad}, {konu} konusunda başvuruda bulunmaktadır. "
+            f"İlgili mevzuat hükümleri uyarınca talebin incelenerek sonucun ilgilisine bildirilmesi "
+            f"hususunda gereğini rica ederim."
+        )
+    elif evrak_turu == "İtiraz Metni":
+        yazi_turu = "Üst Yazı"
+        govde = (
+            f"İlgide kayıtlı itiraz dilekçesi ile {ad_soyad}, {konu} hakkında itirazda bulunmaktadır. "
+            f"Konunun incelenerek yasal süre içerisinde gereğinin yapılması hususunda rica ederim."
         )
     else:
         yazi_turu = "Üst Yazı"
         govde = (
-            f"İlgide kayıtlı yazı/başvuru ({konu}) ile ilgili gerekli değerlendirme yapılmak üzere "
-            f"{birim}'ne sevk edilmiştir. Gereğinin yapılması hususunda bilgilerinizi rica ederim."
+            f"İlgide kayıtlı {evrak_tarihi} tarihli yazı ile {konu} talep edilmektedir. "
+            f"Gereğinin yapılması hususunda rica ederim."
         )
 
     return {
         "yonlendirme_karari": {
             "islem_yapacak_ana_kurum": ana_kurum,
             "geregi_icin_yonlendirilecek_birim": birim,
-            "bilgi_icin_iletilecek_birimler": kurumlar[1:3] if len(kurumlar) > 1 else [],
-            "yonlendirme_gerekcesi": (
-                f"Evrak '{evrak_turu}' olarak sınıflandırıldığından ve konusu '{konu}' olduğundan "
-                f"ilgili iş süreçleri kapsamında {birim}'ne yönlendirilmesi uygun görülmüştür."
-            ),
+            "bilgi_icin_iletilecek_birimler": [],
+            "yonlendirme_gerekcesi": f"{evrak_turu} niteliğindeki başvurunun {birim} görev alanına girmesi.",
         },
         "resmi_yazi_taslagi": {
             "yazi_turu": yazi_turu,
-            "konu": f"{konu} Hk.",
-            "ilgi": f"{ad_soyad} tarafından iletilen {evrak_tarihi} tarihli başvuru.",
+            "konu": f"{konu} Hk." if konu else "Başvuru İncelemesi Hk.",
+            "ilgi": f"{evrak_tarihi} tarihli başvuru.",
             "govde_metni": govde,
             "imza_makami": "Birim Amiri",
         },
         "kullanici_bilgilendirme": {
             "kullaniciya_gosterilecek_mesaj": (
-                (f"Başvurunuz alınmış olup işleme konulması için eksik bilgilerin ({', '.join(kalan_eksikler)}) "
-                 f"tarafımıza iletilmesi gerekmektedir.")
+                f"Başvurunuz ({konu}) alınmış olup, eksik bilgilerin ({', '.join(kalan_eksikler)}) tamamlanması beklenmektedir."
                 if kalan_eksikler else
                 f"Başvurunuz ({konu}) alınmış ve {birim} birimine yönlendirilmiştir."
             ),
@@ -304,6 +335,14 @@ def _map_gorev1_response(data):
     gorev1_data = data.get("gorev1_ciktisi", data)
     gonderen = gorev1_data.get("gonderen", {}) or {}
     varliklar = gorev1_data.get("varliklar", {}) or {}
+    devam = gorev1_data.get(
+        "isleme_devam_edilebilirlik_durumu",
+        {"zorunlu_eksikler": [], "tamamlanabilir_eksikler": [], "zorunlu_olmayan_eksikler": []},
+    )
+    taslak_olur = gorev1_data.get("taslak_olusturulabilir_mi", devam.get("taslak_olusturulabilir_mi", True))
+    derece = gorev1_data.get("eksik_bilgi_derecesi", devam.get("derece"))
+    gerekce = gorev1_data.get("isleme_devam_gerekcesi", devam.get("gerekce"))
+
     return {
         "evrak_turu": gorev1_data.get("evrak_turu", "Bilinmiyor"),
         "konu": gorev1_data.get("konu", ""),
@@ -323,10 +362,10 @@ def _map_gorev1_response(data):
         },
         "ilgili_mevzuat_onerisi": gorev1_data.get("ilgili_mevzuat_onerisi", []),
         "eksik_bilgiler": gorev1_data.get("eksik_bilgiler", []),
-        "isleme_devam_edilebilirlik_durumu": gorev1_data.get(
-            "isleme_devam_edilebilirlik_durumu",
-            {"zorunlu_eksikler": [], "zorunlu_olmayan_eksikler": []},
-        ),
+        "isleme_devam_edilebilirlik_durumu": devam,
+        "taslak_olusturulabilir_mi": taslak_olur,
+        "eksik_bilgi_derecesi": derece,
+        "isleme_devam_gerekcesi": gerekce,
         "aciliyet_durumu": gorev1_data.get("aciliyet_durumu", "Normal"),
         "ham_json": raw_json,
     }

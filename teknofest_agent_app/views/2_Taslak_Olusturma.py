@@ -42,14 +42,32 @@ with st.container():
     with st.expander("Görev 1 Analiz Verilerini İncele"):
         st.json(analiz)
 
-# Eksik Bilgiler
+taslak_olur = analiz.get("taslak_olusturulabilir_mi", True)
+derece = analiz.get("eksik_bilgi_derecesi", "")
+
+# Eksik Bilgiler & Ek Bilgi Girişi
 ek_bilgi = ""
 eksikler = [e for e in analiz.get("eksik_bilgiler", []) if e]
-if eksikler:
-    st.warning("Eksik bilgiler tespit edildi: " + ", ".join(eksikler))
-    ek_bilgi = st.text_input("Ek Bilgi / Not Girişi (Opsiyonel):", placeholder="Taslağa eklenecek notları yazın...")
 
-if st.button("Resmi Yazı Taslağı ve Yönlendirme Oluştur", type="primary", use_container_width=True):
+if not taslak_olur:
+    st.error(
+        f"⛔ **Mevzuat Uyarısı ({derece}):**\n\n"
+        f"{analiz.get('isleme_devam_gerekcesi', '3071 Sayılı Kanun gereğince kimlik/talep bilgisi olmadan taslak üretilemez.')}\n\n"
+        f"Taslağın oluşturulabilmesi için lütfen aşağıdaki alana eksik olan zorunlu bilgileri (Ad-Soyad, Konu vb.) giriniz."
+    )
+    ek_bilgi = st.text_input("Zorunlu Ek Bilgi / Kimlik Girişi (Gereklidir):", placeholder="Örn: Başvuru Sahibi: Ahmet Yılmaz, T.C.: 12345678901, Konu: ...")
+elif eksikler:
+    st.warning("⚠️ **Tamamlanabilir İdari Eksiklikler:** " + ", ".join(eksikler))
+    ek_bilgi = st.text_input("Ek Bilgi / Not Girişi (Opsiyonel):", placeholder="Taslağa veya cevaba eklenecek notları yazabilirsiniz...")
+
+buton_devre_disi = (not taslak_olur and not (ek_bilgi and ek_bilgi.strip()))
+
+if st.button(
+    "Resmi Yazı Taslağı ve Yönlendirme Oluştur",
+    type="primary",
+    disabled=buton_devre_disi,
+    use_container_width=True,
+):
     with st.spinner("Ajanlar mevzuat kurallarına göre taslak ve sevk kararını hazırlıyor..."):
         sonuc, log, hata = gorev2_taslak(
             analiz,

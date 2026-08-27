@@ -165,35 +165,54 @@ if st.session_state.gorev1_sonuc:
         else:
             st.markdown("- Mevzuat tespit edilemedi")
 
-    st.markdown("**İşleme Devam Edilebilirlik Durumu**")
+    st.markdown("**İşleme Devam Edilebilirlik ve Mevzuat Derecelendirmesi**")
     devam_durumu = s.get("isleme_devam_edilebilirlik_durumu", {}) or {}
+    taslak_olur = s.get("taslak_olusturulabilir_mi", devam_durumu.get("taslak_olusturulabilir_mi", True))
+    derece = s.get("eksik_bilgi_derecesi", devam_durumu.get("derece", "Eksiksiz (Doğrudan Üst Yazı Yazılabilir)"))
+    gerekce = s.get("isleme_devam_gerekcesi", devam_durumu.get("gerekce", ""))
     zorunlu_eksikler = devam_durumu.get("zorunlu_eksikler", [])
-    zorunlu_olmayan_eksikler = devam_durumu.get("zorunlu_olmayan_eksikler", [])
+    tamamlanabilir_eksikler = devam_durumu.get("tamamlanabilir_eksikler") or devam_durumu.get("zorunlu_olmayan_eksikler", [])
+
     with st.container(border=True):
-        if zorunlu_eksikler:
-            st.markdown("⛔ **İşleme devam edebilmem için şu bilgiler zorunludur:**")
-            for eksik in zorunlu_eksikler:
+        if not taslak_olur:
+            st.error(
+                f"⛔ **Mevzuat Engeli: {derece}**\n\n"
+                f"{gerekce}"
+            )
+            if zorunlu_eksikler:
+                st.markdown("**Zorunlu Eksiklikler (3071 m.4/6, 4982 m.6):**")
+                for eksik in zorunlu_eksikler:
+                    st.markdown(
+                        f"- 🔴 **{eksik.get('bilgi', 'Belirtilmemiş')}:** "
+                        f"*{eksik.get('mevzuat_maddesi', 'İlgili Kanun')}* — {eksik.get('sonuc', 'İşlem engellenir.')}"
+                    )
+            st.info("💡 **Ajan Notu:** Bu evrak mevzuat gereği doğrudan sevk edilemez. Taslak oluşturabilmek için lütfen sol menüden veya evrak metninden başvuru sahibi kimlik/talep bilgilerini ekleyiniz.")
+        elif tamamlanabilir_eksikler or "Tamamlanabilir" in str(derece):
+            st.warning(
+                f"⚠️ **Mevzuat Değerlendirmesi: {derece}**\n\n"
+                f"{gerekce}"
+            )
+            st.markdown("**Tamamlatılabilecek İdari Eksiklikler:**")
+            for eksik in tamamlanabilir_eksikler:
                 st.markdown(
-                    f"- {eksik.get('bilgi', 'Belirtilmemiş')} — "
-                    f"{eksik.get('mevzuat_maddesi', 'İlgili madde belirtilmemiş')} "
-                    f"gereği {eksik.get('sonuc', 'işlem duraklar.')}"
+                    f"- 🟡 **{eksik.get('bilgi', 'Belirtilmemiş')}:** "
+                    f"*{eksik.get('mevzuat_maddesi', 'İlgili Kanun/Yönetmelik')}* — {eksik.get('sonuc', 'Eksik Belge Talebi yazısıyla tamamlanabilir.')}"
                 )
-        if zorunlu_olmayan_eksikler:
-            st.markdown("✅ **Şu bilgiler eksik ancak işleme devam edilebilir:**")
-            for eksik in zorunlu_olmayan_eksikler:
-                st.markdown(
-                    f"- {eksik.get('bilgi', 'Belirtilmemiş')} — "
-                    f"{eksik.get('mevzuat_maddesi', 'İlgili madde belirtilmemiş')} "
-                    f"gereği {eksik.get('sonuc', 'sonradan tamamlanabilir; işleme devam edilebilir.')}"
-                )
-        if not zorunlu_eksikler and not zorunlu_olmayan_eksikler:
-            st.markdown("✅ Eksik bilgi bulunmadığından işleme devam edilebilir.")
+        else:
+            st.success(
+                f"✅ **Mevzuata Uygunluk: {derece}**\n\n"
+                f"{gerekce or 'Evrak yasal ve idari unsurları tam taşımaktadır. Doğrudan üst yazı üretilebilir.'}"
+            )
 
     with st.expander("Ham JSON Çıktı (Backend Kontrolü)"):
         st.json(s)
 
     st.divider()
-    st.page_link(
-        "views/2_Taslak_Olusturma.py",
-        label="→  Yazı Taslağı Oluştur",
-    )
+    if taslak_olur:
+        btn_label = "→  Eksik Belge Talebi Taslağı Oluştur (Görev 2)" if tamamlanabilir_eksikler else "→  Resmi Yazı Taslağı Oluştur (Görev 2)"
+        st.page_link(
+            "views/2_Taslak_Olusturma.py",
+            label=btn_label,
+        )
+    else:
+        st.button("⛔ Görev 2 Engellendi (Mevzuat Gereği Taslak Oluşturulamaz)", disabled=True, use_container_width=True)

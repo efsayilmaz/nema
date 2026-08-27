@@ -152,13 +152,13 @@ class Gorev1BenchmarkTest(unittest.TestCase):
                     self.assertIn("onemli_bilgi_unsurlari", data)
                     self.assertIn("yasal_yanit_suresi", data)
                     self.assertIn("isleme_devam_edilebilirlik_durumu", data)
-                    self.assertEqual(
-                        data["isleme_devam_edilebilirlik_durumu"],
-                        {"zorunlu_eksikler": [], "zorunlu_olmayan_eksikler": []},
-                    )
+                    self.assertIn("taslak_olusturulabilir_mi", data["isleme_devam_edilebilirlik_durumu"])
+                    self.assertIn("derece", data["isleme_devam_edilebilirlik_durumu"])
+                    self.assertIn("zorunlu_eksikler", data["isleme_devam_edilebilirlik_durumu"])
                     self.assertIn("varliklar", data)
                     self.assertIn("aciliyet_durumu", data)
-                    self.assertIn(data["aciliyet_durumu"], {"Normal", "İvedi", "Çok İvedi"})
+                    aciliyet_val = data["aciliyet_durumu"].value if hasattr(data["aciliyet_durumu"], "value") else str(data["aciliyet_durumu"])
+                    self.assertIn(aciliyet_val, {"Normal", "İvedi", "Çok İvedi"})
             self.assertEqual(len(completions.calls), len(CASELER) * 3)
 
     def test_realistic_risk_detection(self):

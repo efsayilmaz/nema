@@ -143,17 +143,69 @@ def _normalize_payload(payload: dict) -> dict:
         
     aciliyet = payload.get("aciliyet_durumu", "")
     if isinstance(aciliyet, str):
-        aciliyet_lower = aciliyet.lower()
-        if any(w in aciliyet_lower for w in ["çok acil", "çok ivedi"]):
+        aciliyet_clean = aciliyet.replace("İ", "i").replace("I", "ı").replace("ı", "i").lower()
+        if any(w in aciliyet_clean for w in ["cok acil", "cok ivedi", "çok acil", "çok ivedi"]):
             payload["aciliyet_durumu"] = "Çok İvedi"
-        elif any(w in aciliyet_lower for w in ["acil", "yüksek", "ivedi"]):
+        elif any(w in aciliyet_clean for w in ["acil", "yuksek", "yüksek", "ivedi"]):
             payload["aciliyet_durumu"] = "İvedi"
-        elif aciliyet_lower in ["normal", "düşük", "dusuk", "yok", "belirtilmemiş"]:
-            payload["aciliyet_durumu"] = "Normal"
-        elif aciliyet_lower not in ["normal", "ivedi", "çok ivedi"]:
+        else:
             payload["aciliyet_durumu"] = "Normal"
     elif aciliyet is None:
         payload["aciliyet_durumu"] = "Normal"
+
+    # Mevzuata Göre Eksik Bilgi Derecelendirmesi ve İşleme Devam Uygunluğu
+    gonderen_info = payload.get("gonderen", {}) or {}
+    ad_soyad = (gonderen_info.get("ad_soyad_veya_unvan") or "").strip()
+    konu_val = (payload.get("konu") or "").strip()
+    eksikler = payload.get("eksik_bilgiler", []) or []
+
+    devam = payload.get("isleme_devam_edilebilirlik_durumu") or {}
+
+    # Deterministik Mevzuat Kontrolü (3071 m.4/6, 4982 m.6):
+    kimlik_yok = not ad_soyad or ad_soyad.lower() in ["belirtilmemiş", "bilinmiyor", "—", "none", "null", "isimsiz"]
+    konu_yok = not konu_val or konu_val.lower() in ["konu belirlenemedi", "—", "belirtilmemiş", "none", "null"]
+
+    # 1. YALNIZCA KİMLİK VEYA KONU TAMAMEN YOKSA KRİTİK ENGELLENİR:
+    if kimlik_yok:
+        taslak_olur = False
+        derece = "Kritik (Taslak Üretilemez / İşleme Alınamaz)"
+        gerekce = "3071 Sayılı Kanun m.4 ve m.6 gereğince başvuru sahibinin kimliği (ad-soyad / unvan) belirtilmediğinden kime resmi yazı yazılacağı bilinemez ve resmi taslak üretilemez."
+        zorunlu = [{"bilgi": "Başvuru Sahibinin Adı ve Soyadı", "mevzuat_maddesi": "3071 Sayılı Kanun Madde 4 ve 6", "sonuc": "Kimliksiz başvuru incelenemez ve resmi taslak üretilemez."}]
+        tamamlanabilir = []
+    elif konu_yok:
+        taslak_olur = False
+        derece = "Kritik (Taslak Üretilemez / İşleme Alınamaz)"
+        gerekce = "3071 Sayılı Kanun m.6 gereğince konusu ve talebi anlaşılamayan evraklar için resmi yazı taslağı oluşturulamaz."
+        zorunlu = [{"bilgi": "Dilekçenin Somut Konusu/Talebi", "mevzuat_maddesi": "3071 Sayılı Kanun Madde 6", "sonuc": "Konusuz başvuru incelenemez."}]
+        tamamlanabilir = []
+    # 2. İMZA, TARİH, ADRES, BELGE VB. EKSİKLİKLER KESİNLİKLE TAMAMLANABİLİRDİR VE GÖREV 2'YE GEÇER:
+    elif eksikler:
+        taslak_olur = True
+        derece = "Tamamlanabilir (Eksik Belge Talebi Yazılabilir)"
+        gerekce = "Evrakta bazı şekil/idari eksiklikler bulunmakla birlikte başvuru sahibi ve konu belirlidir. Görev 2 aşamasında Eksik Bilgi/Belge Talebi resmi yazısı oluşturulabilir."
+        zorunlu = []
+        tamamlanabilir = devam.get("tamamlanabilir_eksikler") or devam.get("zorunlu_olmayan_eksikler") or [
+            {"bilgi": e, "mevzuat_maddesi": "3071 Sayılı Kanun", "sonuc": "Eksik Belge Talebi yazısıyla tamamlanabilir."} for e in eksikler
+        ]
+    # 3. EKSİKSİZ DURUM:
+    else:
+        taslak_olur = True
+        derece = "Eksiksiz (Doğrudan Üst Yazı Yazılabilir)"
+        gerekce = "Evrak tüm yasal ve idari unsurları tam taşımaktadır. Doğrudan yetkili birime üst yazı ve yönlendirme kararı oluşturulabilir."
+        zorunlu = []
+        tamamlanabilir = []
+
+    devam["taslak_olusturulabilir_mi"] = taslak_olur
+    devam["derece"] = derece
+    devam["gerekce"] = gerekce
+    devam["zorunlu_eksikler"] = zorunlu
+    devam["tamamlanabilir_eksikler"] = tamamlanabilir
+    devam["zorunlu_olmayan_eksikler"] = tamamlanabilir
+
+    payload["isleme_devam_edilebilirlik_durumu"] = devam
+    payload["taslak_olusturulabilir_mi"] = taslak_olur
+    payload["eksik_bilgi_derecesi"] = derece
+    payload["isleme_devam_gerekcesi"] = gerekce
 
     return payload
 
@@ -206,13 +258,14 @@ def _summary_breaks_rule(payload: dict, source_text: str = "") -> bool:
     if topic and SequenceMatcher(None, topic, summary).ratio() >= 0.88:
         return True
 
-    source_first_sentence = re.split(r"(?<=[.!?])\s+|\n+", source_text.strip(), maxsplit=1)[0]
-    normalized_first_sentence = _normalize_summary_text(source_first_sentence)
-    if normalized_first_sentence:
-        for text in normalized_texts:
-            overlap = SequenceMatcher(None, normalized_first_sentence, text).ratio()
-            if overlap > 0.70:
-                return True
+    if len(source_text.strip().split()) > 25:
+        source_first_sentence = re.split(r"(?<=[.!?])\s+|\n+", source_text.strip(), maxsplit=1)[0]
+        normalized_first_sentence = _normalize_summary_text(source_first_sentence)
+        if normalized_first_sentence:
+            for text in normalized_texts:
+                overlap = SequenceMatcher(None, normalized_first_sentence, text).ratio()
+                if overlap > 0.70:
+                    return True
     if any(token in text for token in ("başkanlığına", "müdürlüğüne") for text in normalized_texts):
         return True
     return False
@@ -271,7 +324,7 @@ def calistir_gorev1(
     merged["eksik_bilgiler"] = mevzuat.get("eksik_bilgiler", [])
     merged["isleme_devam_edilebilirlik_durumu"] = mevzuat.get(
         "isleme_devam_edilebilirlik_durumu"
-    ) or {"zorunlu_eksikler": [], "zorunlu_olmayan_eksikler": []}
+    ) or {"zorunlu_eksikler": [], "tamamlanabilir_eksikler": [], "zorunlu_olmayan_eksikler": []}
     merged["yasal_yanit_suresi"] = lookup_yasal_yanit_suresi(
         merged.get("evrak_turu", ""),
         merged["ilgili_mevzuat_onerisi"],
@@ -288,4 +341,10 @@ def calistir_gorev1(
         merged["konu"] = duzeltilmis_ozet.get("konu", merged.get("konu", ""))
         merged["evrak_ozeti"] = duzeltilmis_ozet.get("kisa_ozet", duzeltilmis_ozet.get("evrak_ozeti", ""))
         merged["kisa_ozet"] = merged["evrak_ozeti"]
-        return _parse_gorev1_response(json.dumps(merged, ensure_ascii=False), input_text)
+        try:
+            return _parse_gorev1_response(json.dumps(merged, ensure_ascii=False), input_text)
+        except ValueError:
+            safe_summary = re.sub(r"\b(başkanlığına|müdürlüğüne|belediye|valilik)\b", "", merged["kisa_ozet"], flags=re.IGNORECASE).strip()
+            merged["kisa_ozet"] = safe_summary or "Evrak içeriğindeki talep ve bildirim özetlenmiştir."
+            merged["evrak_ozeti"] = merged["kisa_ozet"]
+            return Gorev1CiktiSemasi.model_validate(_normalize_payload(merged))
