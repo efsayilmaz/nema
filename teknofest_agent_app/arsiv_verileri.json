@@ -118,5 +118,29 @@
         "rag_benzerlik_skoru": null,
         "referans_sayaci": 0,
         "kullanım_sayisi": 0
+    },
+    {
+        "id": "ARS-2026-08-DB38",
+        "sektor": "Yazı",
+        "tarih": "2026-08-28",
+        "konu": "Yol ve kaldırım onarım çalışmaları ile imar durumu bilgisi hakkında",
+        "onaylayanlar": [
+            "İçerik Uzmanı: KVKK-26"
+        ],
+        "anonim_metin": "T.C.\nERZURUM BÜYÜKŞEHİR BELEDİYESİ\n\nSayı  : E-74892156-622.01-2026/3412\nKonu  : YOL VE KALDIRIM ONARIM ÇALIŞMALARI İLE İMAR DURUMU BİLGİSİ HAKKINDA\nTarih : 27.08.2026\n\nERZURUM BÜYÜKŞEHİR BELEDİYESİ FEN İŞLERİ DAİRESİ BAŞKANLIĞINA\n\nİlgi: 27.08.2026 tarihli ve E-74892156-622.01-2026/3412 sayılı yazınız.\n\nİlgili yazınızda belirtilen Yakutiye İlçesi [VATANDAŞ_ADRES] üzerinde, altyapı çalışmaları sonrası oluşan yol ve kaldırım hasarlarının giderilmesi talebi ile bölgenin imar durumu hakkında edinilmek istenen bilgiler incelenmiştir. Yapılan inceleme neticesinde, söz konusu onarım işlemlerinin 2026 Yılı 3. Çeyrek Acil Müdahale Programı kapsamında değerlendirildiği ve işlemlerin [OLAY_TARİHİ] tarihine kadar tamamlanacağı bilgisi alınmıştır. Ayrıca, başvuru sahibine güncel imar planı örneği ekte tarafına iletilmiştir. Konuya ilişkin yapılan işlemler ve alınan tedbirler hakkında bilgi verilmesi hususunu saygılarımla.\n\nGereğini arz ederim.\n\n[İMZALAYAN MAKAM - DOLDURULACAK]",
+        "uyumlu_mevzuat": "5393 Sayılı Belediye Kanunu Madde 14",
+        "evrak_turu": "Yazı",
+        "ilgili_kanun_maddeleri": [
+            "5393 Sayılı Belediye Kanunu Madde 14",
+            "4982 Sayılı Bilgi Edinme Hakkı Kanunu Madde 6"
+        ],
+        "birim": "Belirtilmedi",
+        "mevzuat_versiyon_tarihi": null,
+        "gecerlilik_durumu": "gecerli",
+        "son_hukuki_kontrol_tarihi": "2026-08-28",
+        "kaynak_emsal_idleri": [],
+        "rag_benzerlik_skoru": null,
+        "referans_sayaci": 0,
+        "kullanım_sayisi": 0
     }
 ]
