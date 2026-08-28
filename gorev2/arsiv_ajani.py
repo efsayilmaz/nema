@@ -13,34 +13,43 @@ def regex_katmani_kontrol(metin: str) -> bool:
         return False
     if re.search(r'TR\d{2}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{2}', metin):
         return False
+        
+    # Unvan sonrasında açıkta kalmış isim tespiti (Örn: Av. Burak Kaya)
+    if re.search(r'(Av\.|Dr\.|Sn\.|Prof\.|Doç\.|Yrd\.\s*Doç\.)\s+[A-ZÇĞİÖŞÜ][a-zçğıöşü]+\s+[A-ZÇĞİÖŞÜ][a-zçğıöşü]+', metin):
+        return False
+        
     return True
 
 def _get_stage1_prompt(taslak_metni: str) -> str:
     return f"""Sen uzman bir Veri Güvenliği ve KVKK denetçisisin.
-Görev: Aşağıdaki resmî yazı taslağını anonimleştirirken, KURUMSAL bilgileri KORU, SADECE VATANDAŞ/BAŞVURAN bilgilerini maskele.
+Görev: Aşağıdaki resmî yazı taslağını anonimleştirirken, KURUMSAL bilgileri KORU, metindeki İSTİSNASIZ HER gerçek kişi adı-soyadını MASKELE.
 
 ASLA MASKELENMEYECEK (İDARİ/KURUMSAL ALANLAR - BEYAZ LİSTE):
 - Gönderen ve Alıcı KURUM adları (T.C. Valiliği, Müdürlük, Bakanlık, Başkanlık vb.)
 - Kurumların resmi/idari adresleri
-- Resmî yazının kendi yapısal blokları: "Sayı:" bloğundaki evrak kayıt numaraları (örn: E-71073638), "Tarih:" bloğundaki yazının düzenlenme tarihi, "Konu:" ve "İlgi:" ibareleri KESİNLİKLE MASKELENMEYECEK. Bunlar idari veridir.
+- Resmî yazının kendi yapısal blokları: "Sayı:" bloğundaki evrak kayıt numaraları (örn: E-71073638), "Tarih:" bloğundaki yazının düzenlenme tarihi, "Konu:" ve "İlgi:" ibareleri.
 - Kanun, Yönetmelik veya mevzuat numaraları ve madde adları.
-- Hitap edilen birim adı ve yazıyı imzalayan makam (Birim Amiri, İl Sağlık Müdürü, unvanı ve ismi).
+- Kurumu temsil eden makam unvanları (Birim Amiri, İl Sağlık Müdürü vb.).
 
-SADECE VATANDAŞA/BAŞVURANA AİT VERİLER MASKELENECEK (KARA LİSTE):
-- Vatandaş Adı Soyadı -> [VATANDAŞ_AD_SOYAD]
-- Vatandaş TC Kimlik No, Pasaport No vb. (11 haneli vatandaş numarasıdır, evrak "Sayı:" numarası ile karıştırma!) -> [TC_KİMLİK]
-- Vatandaşın Adresi (Tam adresi teşhis edicidir. Sadece il/ilçe kalabilir, sokak/mahalle/kapı no gizle) -> [VATANDAŞ_ADRES]
-- Vatandaşın Yaşı -> [VATANDAŞ_YAŞ]
-- Vatandaşın Olay Tarihleri (Hastalık başlangıcı, hastaneye sevk tarihi vb. - Resmî yazının Tarihi DEĞİL) -> [OLAY_TARİHİ]
-- Vatandaş İletişim (Telefon, E-posta, IBAN vb.) -> [İLETİŞİM]
-- Özel Nitelikli Veri (Hastalık, teşhis, tıbbi cihaz, ilaç, kan grubu, satürasyon değeri, suç/dava detayı) -> [ÖZEL_SAĞLIK_VERİSİ]
-- Dolaylı Teşhis Edici (Örn: "78 yaşında KOAH hastası", "oksijen cihazına bağlı") -> [DOLAYLI_TANIMLAYICI]
+KESİN KURAL (KİŞİ İSİMLERİ İÇİN):
+- Metindeki İSTİSNASIZ HER gerçek kişi adı-soyadını maskele. Kişinin kim olduğu (vatandaş, vekil, avukat, doktor, tanık, şikayetçi, üçüncü şahıs) FARK ETMEZ.
+- İNSAN ismi geçen HER YER maskelenecek. Unvan varsa unvanı bırak, sadece ismi maskele: 'Av. [AD_SOYAD]', 'Dr. [AD_SOYAD]' gibi. 
+- Placeholder olarak [AD_SOYAD], [TC_KİMLİK], [ADRES], [İLETİŞİM], [SAĞLIK_VERİSİ], [DOLAYLI_TANIMLAYICI] gibi genel veya rol belirten etiketler (örn. [VEKİL_AD_SOYAD], [TANIK_AD_SOYAD]) kullanabilirsin ama mutlaka insan isimlerini GİZLE.
+- Şüpheye düştüğünde MASKELE - bu kesin ve istisnasız bir kuraldır.
 
-KURAL: Kurumsal alanlar ve yazının "Sayı:", "Tarih:" bilgileri asla maskelenmemelidir! Şüpheye düşersen, vatandaş verisiyse maskele, kurum verisiyse bırak.
+DİĞER MASKELENECEKLER:
+- T.C. Kimlik, Telefon, E-posta, IBAN vb.
+- Özel Nitelikli Veri (Teşhis, kan grubu vb.) ve Dolaylı Teşhis Ediciler (örn: "78 yaşındaki hasta").
 
 FEW-SHOT ÖRNEKLER:
-Girdi: "Sayı: E-12345-67 Tarih: 28.08.2026 ... Kadıköy Caferağa Mah. Moda Cad. No:14 adresinde ikamet eden 78 yaşındaki KOAH hastası Fatma Yılmaz'ın 92 satürasyon değeri... İmza: Dr. Ahmet"
-Çıktı: {{"masked_text": "Sayı: E-12345-67 Tarih: 28.08.2026 ... Kadıköy [VATANDAŞ_ADRES] adresinde ikamet eden [DOLAYLI_TANIMLAYICI] [VATANDAŞ_AD_SOYAD]'ın [ÖZEL_SAĞLIK_VERİSİ] değeri... İmza: Dr. Ahmet", "detected_entities": ["Caferağa Mah. Moda Cad. No:14", "78 yaşındaki KOAH hastası", "Fatma Yılmaz", "92 satürasyon"]}}
+Girdi: "Sayı: E-12345-67 Tarih: 28.08.2026 ... Kadıköy Caferağa Mah. Moda Cad. No:14 adresinde ikamet eden 78 yaşındaki KOAH hastası Fatma Yılmaz'ın 92 satürasyon değeri... İmza: İl Sağlık Müdürü"
+Çıktı: {{"masked_text": "Sayı: E-12345-67 Tarih: 28.08.2026 ... Kadıköy [ADRES] adresinde ikamet eden [DOLAYLI_TANIMLAYICI] [AD_SOYAD]'ın [SAĞLIK_VERİSİ] değeri... İmza: İl Sağlık Müdürü", "detected_entities": ["Caferağa Mah. Moda Cad. No:14", "78 yaşındaki KOAH hastası", "Fatma Yılmaz", "92 satürasyon"]}}
+
+Girdi: "İlgi: 27.08.2026 tarihli ve Av. Burak Kaya vekilliğinde iletilen ihtarname. İlgili yazıda müvekkil Mehmet Öz'e ait..."
+Çıktı: {{"masked_text": "İlgi: 27.08.2026 tarihli ve Av. [VEKİL_AD_SOYAD] vekilliğinde iletilen ihtarname. İlgili yazıda müvekkil [VATANDAŞ_AD_SOYAD]'e ait...", "detected_entities": ["Burak Kaya", "Mehmet Öz"]}}
+
+Girdi: "Olay esnasında orada bulunan tanık Ayşe Demir'in beyanına göre..."
+Çıktı: {{"masked_text": "Olay esnasında orada bulunan tanık [TANIK_AD_SOYAD]'in beyanına göre...", "detected_entities": ["Ayşe Demir"]}}
 
 Lütfen sadece JSON objesi döndür (Markdown backtick kullanma).
 Format: {{"masked_text": "...", "detected_entities": ["...", "..."]}}

@@ -17,6 +17,9 @@ from gorev2.schemas import (
 TASLAK_YONLENDIRME_PROMPT = """
 Sen kamu kurumlarında görev yapan kıdemli ve uzman bir evrak işleme, yönlendirme ve resmî yazışma yapay zeka ajanısın.
 Sana Görev 1 aşamasında analiz edilmiş, özeti ve özellikleri çıkarılmış bir evrak verisi (JSON formatında) sunulacaktır.
+Ayrıca, kurallara uyman için "MEVZUAT BAĞLAMI" ve dil/üslup örnekleri için "EMSAL TASLAK BAĞLAMI" sağlanacaktır.
+
+DİKKAT: EMSAL TASLAK BAĞLAMI sadece dil, üslup, yapı ve resmi ifade kalıpları için referanstır. Bu örneklerdeki HİÇBİR spesifik veriyi (tarih, sayı, isim kalıntısı, adres parçası vb.) yeni taslağa KOPYALAMA. Yeni taslak, sadece mevcut evrakın kendi bilgilerine dayanmalı.
 
 GÖREVİN:
 Verilen evrak analizini dikkatle inceleyerek aşağıdaki iki temel bileşenden oluşan yapılandırılmış çıktıyı üretmektir:
@@ -77,6 +80,10 @@ class TaslakYonlendirmeCiktisi(BaseModel):
     resmi_yazi_taslagi: ResmiYaziTaslagi = Field(
         ...,
         description="Hazırlanan resmî yazı taslağı"
+    )
+    kullanilan_referanslar: list[str] = Field(
+        default_factory=list,
+        description="Örnek alınan geçmiş emsal taslakların ID listesi"
     )
 
 
@@ -491,12 +498,94 @@ def calistir_yonlendirme_taslak_ajani(
 ) -> TaslakYonlendirmeCiktisi:
     """
     Görev 1 analiz çıktısını alarak yönlendirme kararı ve resmi yazı taslağını üretir.
+    Ek olarak RAG (Mevzuat + Emsal) bağlantılarını kullanarak bağlam sağlar.
     """
-    schema_str = json.dumps(TaslakYonlendirmeCiktisi.model_json_schema(), ensure_ascii=False)
-    sistem_mesaji = f"""{TASLAK_YONLENDIRME_PROMPT}
+    girdi_dict = {}
+    if isinstance(girdi_verisi, BaseModel) or hasattr(girdi_verisi, "model_dump"):
+        girdi_dict = girdi_verisi.model_dump()
+    elif isinstance(girdi_verisi, dict):
+        girdi_dict = girdi_verisi
+    elif isinstance(girdi_verisi, str):
+        try:
+            girdi_dict = json.loads(girdi_verisi)
+        except:
+            pass
 
-Beklenen JSON Şeması:
-{schema_str}"""
+    # 1. RAG Sorgusu için sorgu metni oluştur
+    ozet = girdi_dict.get("evrak_ozeti") or girdi_dict.get("kisa_ozet") or ""
+    tur = girdi_dict.get("evrak_turu", "")
+    mevzuat = " ".join(girdi_dict.get("ilgili_mevzuat_onerisi", []))
+    rag_query = f"{tur} {ozet} {mevzuat}".strip()
+
+    mevzuat_baglami_str = ""
+    emsal_baglami_str = ""
+    kullanilan_referanslar = []
+    
+    try:
+        from rag import MevzuatRAG
+        rag = MevzuatRAG()
+        
+        # a) Mevzuat Sorgusu
+        mevzuat_sonuclar = rag.mevzuat_sorgula(rag_query, getirilecek_sonuc_sayisi=2)
+        if mevzuat_sonuclar:
+            mevzuat_baglami_str = "MEVZUAT BAĞLAMI:\n- " + "\n- ".join(mevzuat_sonuclar)
+            
+        # b) Emsal Taslak Sorgusu
+        # Arama sadece kendi sektör koleksiyonunda yapılır (A1/A2 gereksinimi)
+        sektor = girdi_dict.get("sektor", "genel")
+        arsiv_sonuclar = rag.arsiv_sorgula(rag_query, sektor=sektor, limit=10, caller_module="gorev2.yonlendirme_taslak_ajani")
+        
+        # Filtreleme (Gecerlilik, Benzerlik Eşiği, İnsan Onayı)
+        uygun_emsaller = []
+        for doc in arsiv_sonuclar:
+            # Benzerlik eşiği (0.60 altı sonuçları reddet)
+            if doc.score < 0.60:
+                continue
+                
+            payload = doc.payload or {}
+            # Geçerlilik kontrolü
+            if payload.get("gecerlilik_durumu") != "gecerli":
+                continue
+                
+            # İnsan onayı kontrolü:
+            # 1. Legacy kayıtlar RAG'da kesinlikle kullanılmaz.
+            if payload.get("_legacy_otomat_onayi") is True:
+                continue
+                
+            # 2. En az 2 yetkilinin onayından geçmemişse kullanılmaz.
+            onaylayanlar = payload.get("onaylayanlar", [])
+            if len(onaylayanlar) < 2:
+                continue
+            
+            emsal_metin = payload.get("text", "")
+            if emsal_metin:
+                uygun_emsaller.append(emsal_metin)
+                kullanilan_referanslar.append(payload.get("id", str(doc.id)))
+            
+            if len(uygun_emsaller) >= 2:  # En fazla 2 örnek verelim
+                break
+                
+        if uygun_emsaller:
+            emsal_baglami_str = "EMSAL TASLAK BAĞLAMI:\n\n" + "\n\n---\n\n".join(uygun_emsaller)
+            
+        # Sayaçları artır (G14)
+        if kullanilan_referanslar:
+            from teknofest_agent_app.utils.arsiv_db import arsiv_referans_artir
+            for ref_id in kullanilan_referanslar:
+                arsiv_referans_artir(ref_id)
+                
+    except Exception as e:
+        print(f"[RAG] Emsal/Mevzuat sorgusunda hata: {e}")
+        # Hata olsa da devam et, boş bağlamla gitsin
+
+    schema_str = json.dumps(TaslakYonlendirmeCiktisi.model_json_schema(), ensure_ascii=False)
+    
+    # Sisteme bağlamları ekle
+    sistem_mesaji = TASLAK_YONLENDIRME_PROMPT
+    if mevzuat_baglami_str or emsal_baglami_str:
+        sistem_mesaji += f"\n\n{mevzuat_baglami_str}\n\n{emsal_baglami_str}"
+
+    sistem_mesaji += f"\n\nBeklenen JSON Şeması:\n{schema_str}"
 
     input_json_str = _normalize_input(girdi_verisi)
     user_prompt = f"Aşağıdaki Görev 1 evrak analiz verisini inceleyerek Yönlendirme ve Resmi Yazı Taslağı çıktısını JSON olarak oluştur:\n\n{input_json_str}"
@@ -581,6 +670,8 @@ Beklenen JSON Şeması:
                     cikti = TaslakYonlendirmeCiktisi.model_validate(payload)
 
 
+            if kullanilan_referanslar:
+                cikti.kullanilan_referanslar = kullanilan_referanslar
             return cikti
 
         except Exception as e:

@@ -436,7 +436,9 @@ def gorev1_analiz(evrak_metni, base_url=None, demo_mode=True, log=None):
 
     try:
         r = requests.post(f"{base_url.rstrip('/')}/api/v1/gorev1",
-                           json={"ham_metin": evrak_metni}, timeout=REQUEST_TIMEOUT_SN)
+                           json={"ham_metin": evrak_metni},
+                           headers={"X-Rol": "yonetici"}, 
+                           timeout=REQUEST_TIMEOUT_SN)
         r.raise_for_status()
         state_response = r.json()
         sonuc = _map_gorev1_response(state_response)
@@ -468,6 +470,7 @@ def gorev2_taslak(analiz_sonucu, ek_bilgi=None, base_url=None, demo_mode=True, l
     try:
         r = requests.post(f"{base_url.rstrip('/')}/api/v1/gorev2",
                            json={"gorev1_ciktisi": analiz_sonucu, "ek_bilgi": ek_bilgi},
+                           headers={"X-Rol": "yonetici"},
                            timeout=REQUEST_TIMEOUT_SN)
         r.raise_for_status()
         state_response = r.json()

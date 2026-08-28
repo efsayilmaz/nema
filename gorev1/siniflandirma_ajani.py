@@ -6,11 +6,13 @@ from evren_client import validate_response_content
 
 SINIFLANDIRMA_AJANI_PROMPT = """
 Sen yalnızca Sınıflandırma ve Bilgi Çıkarım Ajanısın. Evrak türünü belirle ve
-metindeki önemli bilgi unsurlarını çıkar. Gönderen, tarih, sayı, kurum ve
-lokasyon gibi kimlik bilgilerini ayrı alanlara koy. Konu yalnızca evrakın
-niyetini ve gerekçesini anlatan yeni bir cümle olsun; başlık bilgilerini tekrar
-etme. Yalnızca JSON döndür ve şu alanları kullan:
-{"evrak_turu":"...","konu":"...","evrak_tarihi":null,
+metindeki önemli bilgi unsurlarını çıkar. Ayrıca, evrakın içeriğine bakarak 'sektor' 
+alanını belirle (Seçenekler: sağlık, hukuk, savunma, eğitim, belediye, tüketici, bilgi, genel).
+İçeriğinde belirli bir konu/sektör varsa kesinlikle ona ata, sadece hiçbir kategoriye
+girmiyorsa 'genel' seç. Gönderen, tarih, sayı, kurum ve lokasyon gibi kimlik bilgilerini 
+ayrı alanlara koy. Konu yalnızca evrakın niyetini ve gerekçesini anlatan yeni bir cümle olsun; 
+başlık bilgilerini tekrar etme. Yalnızca JSON döndür ve şu alanları kullan:
+{"evrak_turu":"...","sektor":"...","konu":"...","evrak_tarihi":null,
 "sayi_veya_kayit_no":null,"gonderen":{"gonderen_tipi":"...",
 "ad_soyad_veya_unvan":null,"kimlik_veya_vergi_no":null,
 "iletisim_bilgisi":null},"varliklar":{"kurumlar":[],"lokasyonlar":[],

@@ -1,0 +1,68 @@
+{
+  "48f47c05a5877126": {
+    "token": "48f47c05a5877126",
+    "durum": "tamamlandi",
+    "konu": "Kişisel Verilerin Korunması Kanunu Madde 11 Kapsamında Hak Talebi Hk.",
+    "evrak_turu": "İhtarname",
+    "icerik_onaylayan": "ICU-26",
+    "icerik_onay_zamani": "2026-08-28T06:48:16.804021Z",
+    "kvkk_onaylayan": "SISTEM_OTOMASYON",
+    "kvkk_onay_zamani": "2026-08-28T06:48:27.676288Z",
+    "guncelleme_zamani": "2026-08-28T06:48:27.676307"
+  },
+  "a221b2190ed90bae": {
+    "token": "a221b2190ed90bae",
+    "durum": "tamamlandi",
+    "konu": "KVKK Madde 11 Kapsamında Yapılan Başvuru Hakkında",
+    "evrak_turu": "İhtarname",
+    "icerik_onaylayan": "ICU-26",
+    "icerik_onay_zamani": "2026-08-28T07:04:45.115896Z",
+    "kvkk_onaylayan": "SISTEM_OTOMASYON",
+    "kvkk_onay_zamani": "2026-08-28T07:04:56.453707Z",
+    "guncelleme_zamani": "2026-08-28T07:04:56.453732"
+  },
+  "663c44b93a2a0f50": {
+    "token": "663c44b93a2a0f50",
+    "durum": "tamamlandi",
+    "konu": "Personel hakkında başlatılan disiplin soruşturmasında ceza verme zamanaşımı süresinin dolduğu yönündeki hukuki görüş",
+    "evrak_turu": "Hukuki Mütalaa Yazısı",
+    "icerik_onaylayan": "ıcu-26",
+    "icerik_onay_zamani": "2026-08-28T07:07:55.230363Z",
+    "kvkk_onaylayan": "SISTEM_OTOMASYON",
+    "kvkk_onay_zamani": "2026-08-28T07:08:02.918134Z",
+    "guncelleme_zamani": "2026-08-28T07:08:02.918155"
+  },
+  "92189a8201dff04a": {
+    "token": "92189a8201dff04a",
+    "durum": "tamamlandi",
+    "konu": "Yabancı uyruklu şahıs tarafından yapılan taşınmaz imar bilgisi talebi hakkında",
+    "evrak_turu": "Hukuki Mütalaa Yazısı",
+    "icerik_onaylayan": "ıcu-26",
+    "icerik_onay_zamani": "2026-08-28T07:15:59.668175Z",
+    "kvkk_onaylayan": "SISTEM_OTOMASYON",
+    "kvkk_onay_zamani": "2026-08-28T07:16:06.312154Z",
+    "guncelleme_zamani": "2026-08-28T07:16:06.312170"
+  },
+  "354fcc8f16aaa062": {
+    "token": "354fcc8f16aaa062",
+    "durum": "tamamlandi",
+    "konu": "Sahipsiz sokak hayvanlarının toplanması, aşılanması ve sakinlere bilgi verilmesi",
+    "evrak_turu": "Yazı",
+    "icerik_onaylayan": "ıcu-26",
+    "icerik_onay_zamani": "2026-08-28T07:22:03.084566Z",
+    "kvkk_onaylayan": "SISTEM_OTOMASYON",
+    "kvkk_onay_zamani": "2026-08-28T07:22:05.517046Z",
+    "guncelleme_zamani": "2026-08-28T07:22:05.517065"
+  },
+  "0dcd6f6d3be37357": {
+    "token": "0dcd6f6d3be37357",
+    "durum": "tamamlandi",
+    "konu": "Öğrenci sınav notu düzeltme ve transkript güncellemesi hakkında",
+    "evrak_turu": "Yazı",
+    "icerik_onaylayan": "ıcu-26",
+    "icerik_onay_zamani": "2026-08-28T07:24:44.396993Z",
+    "kvkk_onaylayan": "SISTEM_OTOMASYON",
+    "kvkk_onay_zamani": "2026-08-28T07:24:48.099734Z",
+    "guncelleme_zamani": "2026-08-28T07:24:48.099756"
+  }
+}

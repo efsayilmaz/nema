@@ -66,6 +66,10 @@ class IslemeDevamEdilebilirlikSemasi(BaseModel):
 
 class Gorev1CiktiSemasi(BaseModel):
     evrak_turu: str
+    sektor: str = Field(
+        default="genel",
+        description="Evrak içeriğinin ait olduğu sektörel alan (örn: sağlık, hukuk, savunma, eğitim, belediye, tüketici, bilgi, genel). Hiçbirine uymuyorsa 'genel' seçin."
+    )
     evrak_ozeti: str = Field(
         default="",
         description="Özetleme ajanının evrakın niyetini ve gerekçesini anlatan kısa özeti."

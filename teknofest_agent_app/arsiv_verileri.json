@@ -1,41 +1,122 @@
 [
     {
-        "id": "ARS-2026-08-AAFA",
-        "sektor": "Dilekçe",
+        "id": "ARS-2026-08-1342",
+        "sektor": "İhtarname",
         "tarih": "2026-08-28",
-        "konu": "Elektrik kesintileri nedeniyle oksijen cihazı kullanımı aksayan yaşlı hasta için acil sağlık ve altyapı desteği talebi",
+        "konu": "KVKK Madde 11 Kapsamında Yapılan Başvuru Hakkında",
         "onaylayanlar": [
-            "İçerik Uzmanı",
-            "KVKK Otomatı: KABUL"
+            "İçerik Uzmanı: ICU-26"
         ],
-        "anonim_metin": "T.C.\nDİYARBAKIR VALİLİĞİ İL SAĞLIK MÜDÜRLÜĞÜ\n\nSayı  : E-80519557-950.01.04-9619\nKonu  : ELEKTRİK KESİNTİLERİ NEDENİYLE OKSİJEN CİHAZI KULLANIMI AKSAYAN YAŞLI HASTA İÇİN ACİL SAĞLIK VE ALTYAPI DESTEĞİ TALEBİ\nTarih : 25.08.2026\n\nT.C. DİYARBAKIR VALİLİĞİ SAĞLIK HİZMETLERİ GENEL MÜDÜRLÜĞÜNE\n\nİlgi: 25.08.2026 tarihli [VATANDAŞ_AD_SOYAD] imzalı dilekçe.\n\nİlgili dilekçede, Sur, [VATANDAŞ_ADRES] adresinde yaşayan [DOLAYLI_TANIMLAYICI] [VATANDAŞ_AD_SOYAD] isimli [ÖZEL_SAĞLIK_VERİSİ] hastanın, evde kullandığı oksijen konsantratörünün sabah ve akşam saatlerinde yaşanan plansız elektrik kesintileri nedeniyle durması sonucu hayati risk altında olduğu, [ÖZEL_SAĞLIK_VERİSİ] ve önceki gece acil servise başvurulduğu belirtilmektedir. Talep sahibi, bölgeye acil durum jeneratörü desteği sağlanması, elektrik kesintilerinin azaltılması veya evde sağlık ekibince durumun yerinde değerlendirilmesi yönünde müdahale edilmesini talep etmektedir..\n\nGereğini arz ederim.\n\n[İMZALAYAN MAKAM - DOLDURULACAK]",
-        "kullanım_sayisi": 0,
-        "uyumlu_mevzuat": "3071 Sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun"
+        "anonim_metin": "T.C.\nÖZEL KUZEYTEPE HASTANESİ İŞLETMECİLİĞİ A.Ş.\n\nSayı  : E-17608091-950.01.04-8716\nKonu  : KVKK MADDE 11 KAPSAMINDA YAPILAN BAŞVURU HAKKINDA\nTarih : 2026-08-27\n\nÖZEL KUZETEPE HASTANESİ İŞLETMECİLİĞİ A.Ş. KVKK UYUM VE HUKUK BİRİMİNE\n\nİlgi: 27.08.2026 tarihli ve Av. Burak Kaya vekilliğinde iletilen ihtarname.\n\nİlgili yazıda, [VATANDAŞ_AD_SOYAD] adına kayıtlı [İLETİŞİM] ve [ÖZEL_SAĞLIK_VERİSİ] verilerinin yanlış işlendiği ve rızası olmaksızın sigorta firmasıyla paylaşıldığı iddiasına istinaden, 6698 Sayılı Kişisel Verilerin Korunması Kanunu'nun 11. maddesi uyarınca hak kullanımı talebi yer almaktadır. Söz konusu başvurunun incelenerek, verilerin doğruluğunun teyit edilmesi, varsa hataların giderilmesi ve üçüncü taraflara aktarım durumuna dair bilginin talep sahibine 30 gün içinde yazılı olarak iletilmesi.\n\nBilgilerinizi ve gereğini arz ederim.\n\n[İMZALAYAN MAKAM - DOLDURULACAK]",
+        "uyumlu_mevzuat": "6698 Sayılı Kişisel Verilerin Korunması Kanunu Madde 11",
+        "evrak_turu": "İhtarname",
+        "ilgili_kanun_maddeleri": [
+            "6698 Sayılı Kişisel Verilerin Korunması Kanunu Madde 11"
+        ],
+        "birim": "Belirtilmedi",
+        "mevzuat_versiyon_tarihi": null,
+        "gecerlilik_durumu": "gecerli",
+        "son_hukuki_kontrol_tarihi": "2026-08-28",
+        "kaynak_emsal_idleri": [],
+        "rag_benzerlik_skoru": null,
+        "referans_sayaci": 0,
+        "kullanım_sayisi": 0
     },
     {
-        "id": "ARS-2026-08-3D27",
-        "sektor": "Şikayet/Dilekçe",
-        "tarih": "2026-08-28",
-        "konu": "Caferağa Mahallesi Mühürdar Caddesi'ndeki güvenlik önlemi alınmamış altyapı çukurunun kapatılması talebi",
-        "onaylayanlar": [
-            "İçerik Uzmanı",
-            "KVKK Otomatı: KABUL"
-        ],
-        "anonim_metin": "T.C.\nKADIKÖY BELEDİYESİ\n\nSayı  : E-15782329-950.01.04-6598\nKonu  : CAFERAĞA MAHALLESİ MÜHÜRDAR CADDESİ'NDEKİ GÜVENLİK ÖNLEMİ ALINMAMIŞ ALTYAPI ÇUKURUNUN KAPATILMASI TALEBİ\nTarih : 26.08.2026\n\nKADIKÖY BELEDİYE BAŞKANLIĞI FEN İŞLERİ MÜDÜRLÜĞÜNE\n\nİlgi: 26.08.2026 tarihli [VATANDAŞ_AD_SOYAD] imzalı dilekçe.\n\nİlgili dilekçe ekinde belirtilen; Caferağa Mahallesi, Mühürdar Caddesi, [VATANDAŞ_ADRES] önünde su tesisatı çalışması sonrası oluşan ve etrafında herhangi bir güvenlik önlemi (uyarı levhası, bariyer vb.) bulunmayan derin çukurun yayalar için ciddi yaralanma riski oluşturduğu, ayrıca [OLAY_TARİHİ] yaşanan bir kaza olayı nedeniyle konunun aciliyet arz ettiği belirtilmiştir. 5393 Sayılı Belediye Kanunu'nun 14..\n\nGereğini arz ederim.\n\n[İMZALAYAN MAKAM - DOLDURULACAK]",
-        "kullanım_sayisi": 0,
-        "uyumlu_mevzuat": "3071 Sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun"
-    },
-    {
-        "id": "ARS-2026-08-F7C4",
+        "id": "ARS-2026-08-CEED",
         "sektor": "Hukuki Mütalaa Yazısı",
         "tarih": "2026-08-28",
-        "konu": "Yabancı uyruklu vatandaşın taşınmaz imar bilgisi talebi hakkında işlem",
+        "konu": "Personel hakkında başlatılan disiplin soruşturmasında ceza verme zamanaşımı süresinin dolduğu yönündeki hukuki görüş",
         "onaylayanlar": [
-            "İçerik Uzmanı",
-            "KVKK Otomatı: KABUL"
+            "İçerik Uzmanı: ıcu-26"
         ],
-        "anonim_metin": "T.C.\nMAVİŞEHİR BELEDİYE BAŞKANLIĞI\n\nE-71073638\nKonu  : YABANCI UYRUKLU VATANDAŞIN TAŞINMAZ İMAR BİLGİSİ TALEBİ HAKKINDA İŞLEM\nTarih : 28.08.2026\n\nT.C. MAVİŞEHİR BELEDİYE BAŞKANLIĞI İMAR VE ŞEHİRCİLİK MÜDÜRLÜĞÜNE\n\nİlgi: Mavişehir Belediye Başkanlığı Hukuk İşleri Müdürlüğünün 24.08.2026 tarihli ve 459123-HK-2026/88 sayılı yazısı.\n\nİlgili yazıda, İngiltere uyruklu [VATANDAŞ_AD_SOYAD]'in Mavişehir ilçesi 45. Ada 12 Parsel'e ait imar durumu ve zemin etüt raporlarını talep ettiği, başvuru sahibinin Türkiye'de ikamet etmesi nedeniyle 4982 Sayılı Bilgi Edinme Hakkı Kanunu hükümleri çerçevesinde bilgi edinme hakkından yararlanabileceği, ancak taşınmazla doğrudan ilgisi ve tapu kayıtlarının kontrol edilmesi gerektiği belirtilmiştir. Hukuki mütalaada, şekil şartlarının sağlanması ve karşılıklılık ilkesi çerçevesinde yasal süre içinde belgelerin verilmesinde bir engel bulunmadığı ifade edilmiştir. Bu kapsamda, söz konusu talebin incelenmesi, başvuru sahibinin taşınmazla hukuki bağının teyidi, gerekli imar bilgileri ve zemin etüt raporlarının hazırlanarak 15 iş günü içinde ilgili kişiye iletilmesi.\n\nGereğini rica ederim.\n\n[İMZALAYAN MAKAM - DOLDURULACAK]",
-        "kullanım_sayisi": 0,
-        "uyumlu_mevzuat": "4982 Sayılı Bilgi Edinme Hakkı Kanunu Madde 4"
+        "anonim_metin": "T.C.\nYILDIZTEPE BELEDİYE BAŞKANLIĞI\n\nSayı  : 763491-HK-2026/112\nKonu  : PERSONEL HAKKINDA BAŞLATILAN DİSİPLİN SORUŞTURMASINDA CEZA VERME ZAMANAŞIMI SÜRESİNİN DOLDUĞU YÖNÜNDEKİ HUKUKİ GÖRÜŞ\nTarih : 21.08.2026\n\nT.C. YILDIZTEPE BELEDİYE BAŞKANLIĞI İNSAN KAYNAKLARI VE EĞİTİM MÜDÜRLÜĞÜNE\n\nİlgi: 21.08.2026 tarihli ve 763491-HK-2026/112 sayılı Hukuk İşleri Müdürlüğü yazısı\n\nİlgili yazıda, VHKİ kadrosunda görevli [VATANDAŞ_AD_SOYAD] hakkında [OLAY_TARİHİ] tarihinde gerçekleştiği iddia edilen 'göreve mazeretsiz gelmeme' fiili nedeniyle açılan disiplin soruşturması kapsamında hukuki görüş bildirildiği, 657 Sayılı Devlet Memurları Kanunu'nun 127. maddesi gereğince disiplin cezası verme süresinin iki yıl olduğu ve fiilin işlendiği tarihten itibaren bu sürenin dolduğu için ceza tesis edilmesinde hukuka uyarlık bulunmadığı belirtilmiştir. Hukuk İşleri Müdürlüğü'nün mütalaası doğrultusunda, dosyadaki usuli gecikmeler ve geçen süre dikkate alınarak soruşturmanın sonuçlandırılmaması ve dosyanın kapatılması hususunda.\n\nGereğini rica ederim.\n\n[İMZALAYAN MAKAM - DOLDURULACAK]",
+        "uyumlu_mevzuat": "657 Sayılı Devlet Memurları Kanunu Madde 125 ve 127",
+        "evrak_turu": "Hukuki Mütalaa Yazısı",
+        "ilgili_kanun_maddeleri": [
+            "657 Sayılı Devlet Memurları Kanunu Madde 125 ve 127",
+            "3071 Sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun Madde 7"
+        ],
+        "birim": "Belirtilmedi",
+        "mevzuat_versiyon_tarihi": null,
+        "gecerlilik_durumu": "gecerli",
+        "son_hukuki_kontrol_tarihi": "2026-08-28",
+        "kaynak_emsal_idleri": [],
+        "rag_benzerlik_skoru": null,
+        "referans_sayaci": 0,
+        "kullanım_sayisi": 0
+    },
+    {
+        "id": "ARS-2026-08-1955",
+        "sektor": "Hukuki Mütalaa Yazısı",
+        "tarih": "2026-08-28",
+        "konu": "Yabancı uyruklu şahıs tarafından yapılan taşınmaz imar bilgisi talebi hakkında",
+        "onaylayanlar": [
+            "İçerik Uzmanı: ıcu-26"
+        ],
+        "anonim_metin": "T.C.\nMAVİŞEHİR BELEDİYE BAŞKANLIĞI\n\nE-71073638\nKonu  : YABANCI UYRUKLU ŞAHIS TARAFINDAN YAPILAN TAŞINMAZ İMAR BİLGİSİ TALEBİ HAKKINDA\nTarih : 2026-08-24\n\nMAVİŞEHİR BELEDİYE BAŞKANLIĞI İMAR VE ŞEHİRCİLİK MÜDÜRLÜĞÜNE\n\nİlgi: 24.08.2026 tarihli ve 2026/402 sayılı İmar ve Şehircilik Müdürlüğü yazısı ve 24.08.2026 tarihli ve 459123-HK-2026/88 sayılı Hukuk İşleri Müdürlüğü mütalaası.\n\nİngiltere uyruklu şahıs tarafından Mavişehir ilçesi 45. Ada 12 Parsel numaralı taşınma ait imar durumu ve zemin etüt raporlarının verilmesi talebi, 4982 Sayılı Bilgi Edinme Hakkı Kanunu hükümleri çerçevesinde incelenmiştir. İlgili birimin 24.08.2026 tarihli ve 2026/402 sayılı yazısı ile Hukuk İşleri Müdürlüğünün aynı tarihli ve 459123-HK-2026/88 sayılı mütalaasında, başvuru sahibinin Türkiye'de ikamet etmesi ve taşınmazla doğrudan ilgisi bulunması şartıyla bilgi edinme hakkından yararlanabileceği, tapu kayıtlarından yapılan kontrollerde ise hukuki bir engel teşkil edecek durumun olmadığı belirtilmiştir..\n\nBilgilerinizi ve gereğini arz ederim.\n\n[İMZALAYAN MAKAM - DOLDURULACAK]",
+        "uyumlu_mevzuat": "4982 Sayılı Bilgi Edinme Hakkı Kanunu Madde 4",
+        "evrak_turu": "Hukuki Mütalaa Yazısı",
+        "ilgili_kanun_maddeleri": [
+            "4982 Sayılı Bilgi Edinme Hakkı Kanunu Madde 4",
+            "4982 Sayılı Bilgi Edinme Hakkı Kanunu Madde 6"
+        ],
+        "birim": "Belirtilmedi",
+        "mevzuat_versiyon_tarihi": null,
+        "gecerlilik_durumu": "gecerli",
+        "son_hukuki_kontrol_tarihi": "2026-08-28",
+        "kaynak_emsal_idleri": [],
+        "rag_benzerlik_skoru": null,
+        "referans_sayaci": 0,
+        "kullanım_sayisi": 0
+    },
+    {
+        "id": "ARS-2026-08-BD7E",
+        "sektor": "Yazı",
+        "tarih": "2026-08-28",
+        "konu": "Sahipsiz sokak hayvanlarının toplanması, aşılanması ve sakinlere bilgi verilmesi",
+        "onaylayanlar": [
+            "İçerik Uzmanı: ıcu-26"
+        ],
+        "anonim_metin": "T.C.\nYILDIZOVA BELEDİYE BAŞKANLIĞI\n\nE-71073638\nKonu  : SAHİPSİZ SOKAK HAYVANLARININ TOPLANMASI, AŞILANMASI VE SAKİNLERE BİLGİ VERİLMESİ\nTarih : 2026-08-22\n\nT.C. YILDIZOVA BELEDİYE BAŞKANLIĞI VETERİNER İŞLERİ MÜDÜRLÜĞÜNE\n\nİlgi: 22.08.2026 tarihli ve 748392-ÇK-2026 sayılı yazınız.\n\nYıldızova Mahallesi Cumhuriyet Parkı ve çevresinde artan sahipsiz ve güçten düşmüş sokak hayvanları nedeniyle çevre sağlığı tehdidi oluştuğu bildirilmektedir. 5393 Sayılı Belediye Kanunu ve 5199 Sayılı Hayvanları Koruma Kanunu hükümleri çerçevesinde söz konusu hayvanların en kısa sürede bakımevine nakledilmesi, sağlık kontrollerinin yapılması, kuduz ve parazit aşılarının uygulanarak kayıt altına alınması ve 4982 Sayılı Bilgi Edinme Hakkı Kanunu kapsamında başvuran mahalle sakinlerine durum hakkında bilgi verilmesi.\n\nGereğini rica ederim.\n\n[İMZALAYAN MAKAM - DOLDURULACAK]",
+        "uyumlu_mevzuat": "5393 Sayılı Belediye Kanunu Madde 14",
+        "evrak_turu": "Yazı",
+        "ilgili_kanun_maddeleri": [
+            "5393 Sayılı Belediye Kanunu Madde 14",
+            "5199 Sayılı Hayvanları Koruma Kanunu Madde 6",
+            "4982 Sayılı Bilgi Edinme Hakkı Kanunu"
+        ],
+        "birim": "Belirtilmedi",
+        "mevzuat_versiyon_tarihi": null,
+        "gecerlilik_durumu": "gecerli",
+        "son_hukuki_kontrol_tarihi": "2026-08-28",
+        "kaynak_emsal_idleri": [],
+        "rag_benzerlik_skoru": null,
+        "referans_sayaci": 0,
+        "kullanım_sayisi": 0
+    },
+    {
+        "id": "ARS-2026-08-693B",
+        "sektor": "Yazı",
+        "tarih": "2026-08-28",
+        "konu": "Öğrenci sınav notu düzeltme ve transkript güncellemesi hakkında",
+        "onaylayanlar": [
+            "İçerik Uzmanı: ıcu-26"
+        ],
+        "anonim_metin": "T.C.\nKUZEYTEPE ÜNİVERSİTESİ\n\nSayı  : 2026/145\nKonu  : ÖĞRENCİ SINAV NOTU DÜZELTME VE TRANSKRİPT GÜNCELLEMESİ HAKKINDA\nTarih : 2026-05-20\n\nT.C. KUZEYTEPE ÜNİVERSİTESİ REKTÖRLÜĞÜ ÖĞRENCİ İŞLERİ DAİRE BAŞKANLIĞINA\n\nİlgi: 20.05.2026 tarihli ve 2026/145 sayılı yazı.\n\nBilgisayar Mühendisliği bölümü öğrencilerinden [VATANDAŞ_AD_SOYAD]'ın (Öğrenci No: [VATANDAŞ_TC_KİMLİK]) Veri Yapıları ve Algoritmalar dersine ait ara sınav notunda, otomasyon sistemine yanlış girilen puan nedeniyle maddi hata tespit edilmiştir. Yapılan inceleme sonucunda notun eksik girildiği anlaşılmış olup, [OLAY_TARİHİ] tarihli ve 2026/12 sayılı Fakülte Yönetim Kurulu kararıyla öğrencinin notunun 65'ten 85'e yükseltilmesine karar verilmiştir. Söz konusu karar gereğince, öğrencinin akademik transkriptindeki ilgili notun güncellenmesi ve kayıt sisteminin buna göre düzenlenmesi.\n\nGereğini arz ederim.\n\n[İMZALAYAN MAKAM - DOLDURULACAK]",
+        "uyumlu_mevzuat": "2547 Sayılı Yükseköğretim Kanunu",
+        "evrak_turu": "Yazı",
+        "ilgili_kanun_maddeleri": [
+            "2547 Sayılı Yükseköğretim Kanunu",
+            "Yükseköğretim Kurumları Lisans Eğitim-Öğretim ve Sınav Yönetmeliği"
+        ],
+        "birim": "Belirtilmedi",
+        "mevzuat_versiyon_tarihi": null,
+        "gecerlilik_durumu": "gecerli",
+        "son_hukuki_kontrol_tarihi": "2026-08-28",
+        "kaynak_emsal_idleri": [],
+        "rag_benzerlik_skoru": null,
+        "referans_sayaci": 0,
+        "kullanım_sayisi": 0
     }
 ]
